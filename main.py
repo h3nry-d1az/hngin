@@ -1,5 +1,7 @@
 # https://math.stackexchange.com/questions/2305792/3d-projection-on-a-2d-plane-weak-maths-ressources
 # https://en.wikipedia.org/wiki/Projection_(linear_algebra)
+# https://en.wikipedia.org/wiki/3D_projection
+# https://en.wikipedia.org/wiki/Painter%27s_algorithm
 from dataclasses import dataclass
 from typing import Tuple, List
 from math import sin, cos
@@ -12,8 +14,9 @@ def cartesian_to_pygame(
     return (x + screen_size[0]//2,
             screen_size[1]//2 - y)
 
-FOVx = 5
-FOVy = 5
+# FOVx = 5
+# FOVy = 5
+FOV = 1000
 
 # screen_size = (640, 480)
 # view_distance = 640*2
@@ -24,24 +27,24 @@ FOVy = 5
 # separation = 100
 
 screen_size = (1280, 720)
-view_distance = 640*4
+view_distance = 640*8
 vertex_size = 15
 
-camera = [0, 0, -400]
+camera = [0, 0, -1000]
 scale = 100
 separation = 200
 
 
 pygame.init()
-pygame.display.set_caption('ortogonal')
+pygame.display.set_caption('interpolacion_lineal')
 
 # CMUSerif = pygame.font.Font("cmunbx.ttf", 32)
 CMUSerif = pygame.font.Font("cmunbx.ttf", 64)
-orthogonal_text = CMUSerif.render("Proyección ortogonal", True, (255, 255, 255))
+orthogonal_text = CMUSerif.render("Interpolación lineal", True, (255, 255, 255))
 orthogonal_text_rect = orthogonal_text.get_rect()
 orthogonal_text_rect.center = (screen_size[0]//2, screen_size[1]//6)
 
-orthogonal_matrix_image = pygame.image.load("orthogonal.png")
+orthogonal_matrix_image = pygame.image.load("lerp.png")
 # orthogonal_matrix_image = pygame.transform.scale(orthogonal_matrix_image, (orthogonal_matrix_image.get_width()*9//10,
 #                                                                            orthogonal_matrix_image.get_height()*9//10))
 
@@ -65,26 +68,34 @@ class V(object):
                    camera: List[int]) -> float:
         return min(max(0, (-255/view_distance)*(self.z-camera[2]) + 255), 255)
 
-    def render(self,
-               camera: List[int]) -> Tuple[int, int]:
-        if self.z <= camera[2]:
-            return (0, 0)
-        coordinates = (self.x - camera[0],
-                       self.y - camera[1])
-        # coordinates = (((self.x-camera[0]) * FOVx) // (self.z-camera[2]),
-        #                ((self.y-camera[1]) * FOVy) // (self.z-camera[2]))
+    def project(self,
+                camera: List[int]) -> Tuple[int, int]:
+        # ORTHOGONAL PROJECTION
+        # coordinates = (self.x - camera[0],
+        #                self.y - camera[1])
+
+        coordinates = (((self.x-camera[0]) * FOV) // (self.z-camera[2]),
+                       ((self.y-camera[1]) * FOV) // (self.z-camera[2]))
+
         # coordinates = (((self.x - camera[0]) * ((self.z - camera[2])/self.z)) + camera[0],
         #                ((self.y - camera[1]) * ((self.z - camera[2])/self.z)) + camera[1])
+
+        return cartesian_to_pygame(*coordinates)
+
+    def render(self,
+               camera: List[int]) -> None:
+        if self.z <= camera[2]:
+            return (0, 0)
+        
         size = min(max(0, (-vertex_size/view_distance)*(self.z-camera[2]) + vertex_size), vertex_size)
 
-        print(cartesian_to_pygame(*coordinates), self.brightness(camera), size)
+        print(self.project(camera), self.brightness(camera), size)
         pygame.draw.circle(screen,
                            (self.brightness(camera),
                             self.brightness(camera), 
                             self.brightness(camera)),
-                           cartesian_to_pygame(*coordinates),
+                           self.project(camera),
                            size)
-        return cartesian_to_pygame(*coordinates)
 
 cube = [
     V(-scale, -scale, -scale),
@@ -124,27 +135,30 @@ while running:
     screen.blit(orthogonal_text, orthogonal_text_rect)
     screen.blit(orthogonal_matrix_image, (screen_size[0]//2 - orthogonal_matrix_image.get_width()//2, 9*screen_size[1]//12))
 
-    for vertex_1 in sorted(cube, key=lambda v: v.brightness(camera)):
-        for vertex_2 in sorted(cube, key=lambda v: v.brightness(camera)):
+    for vertex_1 in cube:
+        for vertex_2 in cube:
             if vertex_1 == vertex_2:
                 continue
-            coordinates_1 = vertex_1.render(camera)
-            coordinates_2 = vertex_2.render(camera)
+            coordinates_1 = vertex_1.project(camera)
+            coordinates_2 = vertex_2.project(camera)
             if coordinates_1 == (0, 0) or\
                coordinates_2 == (0, 0):
                 continue
             pygame.draw.line(screen, (255, 255, 255), coordinates_1, coordinates_2)
 
-    for vertex_1 in sorted(pyramid, key=lambda v: v.brightness(camera)):
-        for vertex_2 in sorted(pyramid, key=lambda v: v.brightness(camera)):
+    for vertex_1 in pyramid:
+        for vertex_2 in pyramid:
             if vertex_1 == vertex_2:
                 continue
-            coordinates_1 = vertex_1.render(camera)
-            coordinates_2 = vertex_2.render(camera)
+            coordinates_1 = vertex_1.project(camera)
+            coordinates_2 = vertex_2.project(camera)
             if coordinates_1 == (0, 0) or\
                coordinates_2 == (0, 0):
                 continue
             pygame.draw.line(screen, (255, 255, 255), coordinates_1, coordinates_2)
+
+    for vertex in sorted(cube + pyramid, key=lambda v: v.brightness(camera)):
+        vertex.render(camera)
 
     pygame.display.flip()
 
@@ -161,6 +175,10 @@ while running:
         camera[2] += speed*delta
     if keys[pygame.K_DOWN]:
         camera[2] -= speed*delta
+    if keys[pygame.K_w]:
+        FOV += speed*delta
+    if keys[pygame.K_s]:
+        FOV -= speed*delta
     if keys[pygame.K_SPACE]:
         camera[1] += speed*delta
     if (keys[pygame.K_LSHIFT]) or \
