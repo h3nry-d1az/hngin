@@ -2,9 +2,12 @@
 # https://en.wikipedia.org/wiki/Projection_(linear_algebra)
 # https://en.wikipedia.org/wiki/3D_projection
 # https://en.wikipedia.org/wiki/Painter%27s_algorithm
+# http://web.cse.ohio-state.edu/~shen.94/581/Site/Lab3_files/Labhelp_Obj_parser.htm
+# https://cs418.cs.illinois.edu/website/text/obj.html
 # https://free3d.com/3d-model/low-poly-male-26691.html
 from dataclasses import dataclass
-from typing import Tuple, List
+from typing import Tuple, List, Callable
+from functools import reduce
 from math import sin, cos
 import pygame
 
@@ -15,17 +18,7 @@ def cartesian_to_pygame(
     return (x + screen_size[0]//2,
             screen_size[1]//2 - y)
 
-# FOVx = 5
-# FOVy = 5
 FOV = 1000
-
-# screen_size = (640, 480)
-# view_distance = 640*2
-# vertex_size = 10
-
-# camera = [0, 0, -200]
-# scale = 50
-# separation = 100
 
 screen_size = (1280, 720)
 view_distance = 640*8
@@ -42,7 +35,7 @@ pygame.display.set_caption('obj')
 # CMUSerif = pygame.font.Font("cmunbx.ttf", 32)
 CMUSerif = pygame.font.Font("cmunbx.ttf", 64)
 orthogonal_text = CMUSerif.render("Importación de archivos OBJ", True, (255, 255, 255))
-solovertices_text = CMUSerif.render("(sólo vértices)", True, (255, 255, 255))
+solovertices_text = CMUSerif.render("(vértices y caras)", True, (255, 255, 255))
 orthogonal_text_rect = orthogonal_text.get_rect()
 orthogonal_text_rect.center = (screen_size[0]//2, screen_size[1]//12)
 solovertices_text_rect = solovertices_text.get_rect()
@@ -56,24 +49,24 @@ screen = pygame.display.set_mode(screen_size)
 
 @dataclass
 class V(object):
-    x: int
-    y: int
+    x: float
+    y: float
     z: float
 
     def move(self,
-             x: int,
-             y: int,
+             x: float,
+             y: float,
              z: float) -> None:
         self.x += x
         self.y += y
         self.z += z
 
     def brightness(self,
-                   camera: List[int]) -> float:
+                   camera: List[float]) -> float:
         return min(max(0, (-255/view_distance)*(self.z-camera[2]) + 255), 255)
 
     def project(self,
-                camera: List[int]) -> Tuple[int, int]:
+                camera: List[float]) -> Tuple[float, float]:
         # ORTHOGONAL PROJECTION
         # coordinates = (self.x - camera[0],
         #                self.y - camera[1])
@@ -87,7 +80,7 @@ class V(object):
         return cartesian_to_pygame(*coordinates)
 
     def render(self,
-               camera: List[int]) -> None:
+               camera: List[float]) -> None:
         if self.z <= camera[2]:
             return (0, 0)
         
@@ -101,50 +94,105 @@ class V(object):
                            self.project(camera),
                            size)
 
-def parse_obj_model(path: str) -> List[V]:
+@dataclass
+class L(object):
+    vertex_1: V
+    vertex_2: V
+
+    def render(self,
+               camera: List[float]) -> None:
+        pygame.draw.line(screen, (255, 255, 255),
+                         self.vertex_1.project(camera),
+                         self.vertex_2.project(camera))
+
+@dataclass
+class Model(object):
+    vertices: List[V]
+    lines: List[L] | None
+
+    def render(self,
+               camera: List[float]) -> None:
+        if self.lines:
+            for line in self.lines:
+                line.render(camera)
+
+        for vertex in sorted(self.vertices, key=lambda v: v.brightness(camera)):
+            vertex.render(camera)
+
+    def transform(self, f: Callable[[V], V]):
+        self.vertices = list(map(f, self.vertices))
+        if self.lines:
+            transformed_lines = []
+            for line in self.lines:
+                transformed_lines.append(L(f(line.vertex_1), f(line.vertex_2)))
+            self.lines = transformed_lines
+
+@dataclass
+class Scene(object):
+    models: List[Model]
+
+    def render(self,
+               camera: List[int]) -> None:
+        lines = reduce(lambda l1, l2: l1 + l2, map(lambda m: m.lines, self.models))
+        if lines:
+            for line in lines:
+                line.render(camera)
+        vertices = reduce(lambda v1, v2: v1 + v2, map(lambda m: m.vertices, self.models))
+        for vertex in sorted(vertices, key=lambda v: v.brightness(camera)):
+            vertex.render(camera)
+
+def parse_obj_model(path: str) -> Model:
     with open(path, 'r') as object:
-        data = object.read().replace('\n\n', '\n')
+        data = object.read()
         # print(data.split('\n'))
-        vertexes = []
+        vertices = []
+        lines = []
         for line in data.split('\n'):
             if len(line) == 0:
                 continue
-            elif line[0] == 'v' and line[1] == ' ':
+            elif line[0:2] == 'v ':
                 params = line.split(' ')
                 # print(params)
-                vertexes.append(V(float(params[1]), float(params[2]), float(params[3])))
-        return vertexes
+                vertices.append(V(float(params[1]), float(params[2]), float(params[3])))
+            elif line[0:2] == 'f ':
+                params = line.split(' ')
+                normalized = []
+                for p in params[1:]:
+                    normalized.append(int(p.split('/')[0]))
+                faces = []
+                for i in range(1, len(normalized)+1):
+                    try:
+                        faces.append([vertices[normalized[0]-1],
+                                      vertices[normalized[i]-1],
+                                      vertices[normalized[i+1]-1]])
+                    except IndexError:
+                        break
+                # print(faces, line, normalized)
+                for face in faces:
+                    lines.append(L(face[0], face[1]))
+                    lines.append(L(face[1], face[2]))
+                    lines.append(L(face[2], face[0]))
+        return Model(vertices, lines)
 
 model = parse_obj_model('model.obj')
+scene = Scene([model])
 
-speed = 1
-# theta = .005
-# theta = .01
+speed = .05
 theta = .015
 
 running = True
 clock = pygame.time.Clock()
+time = 0
+freq = 4000
 
 while running:
     delta = clock.tick(30)
+    time += delta
     screen.fill((0, 0, 0))
     screen.blit(orthogonal_text, orthogonal_text_rect)
     screen.blit(solovertices_text, solovertices_text_rect)
-    # screen.blit(orthogonal_matrix_image, (screen_size[0]//2 - orthogonal_matrix_image.get_width()//2, 9*screen_size[1]//12))
 
-    # for vertex_1 in model:
-    #     for vertex_2 in model:
-    #         if vertex_1 == vertex_2:
-    #             continue
-    #         coordinates_1 = vertex_1.project(camera)
-    #         coordinates_2 = vertex_2.project(camera)
-    #         if coordinates_1 == (0, 0) or\
-    #            coordinates_2 == (0, 0):
-    #             continue
-    #         pygame.draw.line(screen, (255, 255, 255), coordinates_1, coordinates_2)
-
-    for vertex in sorted(model, key=lambda v: v.brightness(camera)):
-        vertex.render(camera)
+    scene.render(camera)
 
     pygame.display.flip()
 
@@ -171,8 +219,9 @@ while running:
        (keys[pygame.K_RSHIFT]):
         camera[1] -= speed*delta
 
-    model = list(map(lambda vertex: V(
+    scene.models[0].transform(lambda vertex: V(
             vertex.z*sin(theta) + vertex.x*cos(theta),
             vertex.y,
             vertex.z*cos(theta) - vertex.x*sin(theta)
-        ), model))
+        ))
+    camera[2] = 40*abs(sin(time/4000)) -50
