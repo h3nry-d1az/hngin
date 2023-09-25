@@ -5,6 +5,7 @@
 # http://web.cse.ohio-state.edu/~shen.94/581/Site/Lab3_files/Labhelp_Obj_parser.htm
 # https://cs418.cs.illinois.edu/website/text/obj.html
 # https://free3d.com/3d-model/low-poly-male-26691.html
+# https://free3d.com/3d-model/low_poly_tree-816203.html
 from dataclasses import dataclass
 from typing import Tuple, List, Callable
 from copy import deepcopy
@@ -27,6 +28,16 @@ class Camera(object):
     theta_x: float = 0
     theta_y: float = 0
 
+interface = tk.Tk()
+interface.title('hngin -- settings bar')
+interface.iconphoto(False, tk.PhotoImage(file='assets/hngin-favicon.png'))
+
+FPS_label = tk.Label(text='Maximum FPS')
+FPS_label.pack()
+FPS_slider = tk.Scale(from_=0, to=60, orient=tk.HORIZONTAL)
+FPS_slider.set(30)
+FPS_slider.pack()
+
 FOV_label = tk.Label(text='FOV (field of view)')
 FOV_label.pack()
 FOV_slider = tk.Scale(from_=0, to=2000, orient=tk.HORIZONTAL)
@@ -46,12 +57,11 @@ camera = Camera(0, 8, -50)
 
 pygame.init()
 pygame.display.set_caption('hngin -- v0.0.1')
+pygame.display.set_icon(pygame.image.load('assets/hngin-favicon.png'))
 
 font = pygame.font.SysFont(None, 38)
 
 screen = pygame.display.set_mode(screen_size)
-interface = tk.Tk()
-interface.withdraw()
 
 @dataclass
 class V(object):
@@ -165,7 +175,8 @@ def parse_obj_model(path: str,
                     lines.append(L(face[2], face[0]))
         return Model(vertices, lines, color)
 
-model = parse_obj_model('models/human.obj', (0, 255, 0))
+model_original = parse_obj_model('models/human.obj', (0, 255, 0))
+model = deepcopy(model_original)
 model.transform(lambda v: V(
     v.x*.75,
     v.y*.75,
@@ -202,8 +213,8 @@ speed_slider.pack()
 
 theta_label = tk.Label(text='Rotation speed')
 theta_label.pack()
-theta_slider = tk.Scale(from_=0, to=.5*100, orient=tk.HORIZONTAL)
-theta_slider.set(.015*2*100)
+theta_slider = tk.Scale(from_=0, to=.001*10000, orient=tk.HORIZONTAL)
+theta_slider.set(.0003*10000)
 theta_slider.pack()
 
 running = True
@@ -216,12 +227,34 @@ freq_slider = tk.Scale(from_=1, to=10_000, orient=tk.HORIZONTAL)
 freq_slider.set(4000)
 freq_slider.pack()
 
+model_label = tk.Label(text='Rotating model')
+model_label.pack()
+model_entry = tk.Entry()
+model_entry.insert(0, 'models/human.obj')
+model_entry.pack()
+
+model_scale_label = tk.Label(text='Rotating model scale')
+model_scale_label.pack()
+model_scale_slider = tk.Scale(from_=0, to=200, orient=tk.HORIZONTAL)
+model_scale_slider.set(75)
+model_scale_slider.pack()
+
+model_speed_label = tk.Label(text='Model rotation speed')
+model_speed_label.pack()
+model_speed_slider = tk.Scale(from_=0, to=.001*10000, orient=tk.HORIZONTAL)
+model_speed_slider.set(.0003*10000)
+model_speed_slider.pack()
+
+model_value = 'models/human.obj'
+scale_value = 75
+
 while running:
-    delta = clock.tick(0)
+    delta = clock.tick(FPS_slider.get())
     time += delta
 
     speed = speed_slider.get() / 100
-    theta = theta_slider.get() / 100
+    theta = theta_slider.get() / 10000
+    mtheta = model_speed_slider.get() / 10000
     freq = freq_slider.get()
 
     screen.fill((0, 0, 0))
@@ -263,23 +296,47 @@ while running:
     # if keys[pygame.K_s]:
     #     FOV -= speed*delta
     if keys[pygame.K_a]:
-        camera.theta_x += theta
+        camera.theta_x += theta*delta
     if keys[pygame.K_d]:
-        camera.theta_x -= theta
+        camera.theta_x -= theta*delta
     if keys[pygame.K_w]:
-        camera.theta_y += theta
+        camera.theta_y += theta*delta
     if keys[pygame.K_s]:
-        camera.theta_y -= theta
+        camera.theta_y -= theta*delta
     if keys[pygame.K_SPACE]:
         camera.y += speed*delta
     if (keys[pygame.K_LSHIFT]) or \
        (keys[pygame.K_RSHIFT]):
         camera.y -= speed*delta
 
+    if (mt := model_entry.get()) != model_value:
+        try:
+            model_original = parse_obj_model(mt, (0, 255, 0))
+            new_model = deepcopy(model_original)
+            new_model.transform(lambda v: V(
+                v.x*ms/100,
+                v.y*ms/100,
+                v.z*ms/100
+            ))
+            scene.models[-1] = new_model
+            model_value = mt
+        except Exception:
+            model_value = mt
+
+    if (ms := model_scale_slider.get()) != scale_value:
+        new_model = deepcopy(model_original)
+        new_model.transform(lambda v: V(
+            v.x*ms/100,
+            v.y*ms/100,
+            v.z*ms/100
+        ))
+        scene.models[-1] = new_model
+        scale_value = ms
+
     scene.models[-1].transform(lambda vertex: V(
-            vertex.z*sin(theta) + vertex.x*cos(theta),
+            vertex.z*sin(mtheta*delta) + vertex.x*cos(mtheta*delta),
             vertex.y,
-            vertex.z*cos(theta) - vertex.x*sin(theta)
+            vertex.z*cos(mtheta*delta) - vertex.x*sin(mtheta*delta)
         ))
     new_icosahedron = deepcopy(base_icosahedron)
     new_icosahedron.transform(lambda v: V(
