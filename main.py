@@ -7,10 +7,10 @@
 # https://free3d.com/3d-model/low-poly-male-26691.html
 from dataclasses import dataclass
 from typing import Tuple, List, Callable
-from functools import reduce
 from copy import deepcopy
-from math import sin, cos, pi, floor
+from math import sin, cos
 import pygame
+import tkinter as tk
 
 def cartesian_to_pygame(
     x: int,
@@ -27,29 +27,31 @@ class Camera(object):
     theta_x: float = 0
     theta_y: float = 0
 
-FOV = 1000
+FOV_label = tk.Label(text='FOV (field of view)')
+FOV_label.pack()
+FOV_slider = tk.Scale(from_=0, to=2000, orient=tk.HORIZONTAL)
+FOV_slider.set(1000)
+FOV_slider.pack()
 
-screen_size = (1280, 720)
-view_distance = 640*8
-vertex_size = 2
+# screen_size = (1280, 720)
+screen_size = (640, 480)
 
-camera = Camera(0, 13, -50)
-scale = 100
-separation = 200
+vertex_size_label = tk.Label(text='Vertex size')
+vertex_size_label.pack()
+vertex_size_slider = tk.Scale(from_=0, to=10, orient=tk.HORIZONTAL)
+vertex_size_slider.set(1)
+vertex_size_slider.pack()
 
+camera = Camera(0, 8, -50)
 
 pygame.init()
-pygame.display.set_caption('rotations')
+pygame.display.set_caption('hngin -- v0.0.1')
 
-# CMUSerif = pygame.font.Font("cmunbx.ttf", 32)
-CMUSerif = pygame.font.Font("cmunbx.ttf", 64)
-rotations_text = CMUSerif.render("Rotaciones de cámara", True, (255, 255, 255))
-rotations_text_rect = rotations_text.get_rect()
-rotations_text_rect.center = (screen_size[0]//2, screen_size[1]//6)
-
-rotations_image = pygame.image.load("rotation.png")
+font = pygame.font.SysFont(None, 38)
 
 screen = pygame.display.set_mode(screen_size)
+interface = tk.Tk()
+interface.withdraw()
 
 @dataclass
 class V(object):
@@ -65,10 +67,6 @@ class V(object):
         self.y += y
         self.z += z
 
-    def brightness(self,
-                   camera: Camera) -> float:
-        return min(max(0, (-255/view_distance)*(self.z-camera.z) + 255), 255)
-
     def project(self,
                 camera: Camera) -> Tuple[float, float]:
         x = (self.x - camera.x)
@@ -81,22 +79,18 @@ class V(object):
             y*cos(tx) - z*sin(tx),
             -x*sin(ty) + y*sin(tx)*cos(ty) + z*cos(tx)*cos(ty)
         )
-        return cartesian_to_pygame((rotated.x * FOV) // rotated.z,
-                                   (rotated.y * FOV) // rotated.z)
+        return cartesian_to_pygame((rotated.x * FOV_slider.get()) // rotated.z,
+                                   (rotated.y * FOV_slider.get()) // rotated.z)
 
     def render(self,
                camera: Camera) -> None:
         # if self.z <= camera.z:
         #     return (0, 0)
-        
-        size = min(max(0, (-vertex_size/view_distance)*(self.z-camera.z) + vertex_size), vertex_size)
 
         pygame.draw.circle(screen,
-                           (self.brightness(camera),
-                            self.brightness(camera), 
-                            self.brightness(camera)),
+                           (255, 255, 255),
                            self.project(camera),
-                           size)
+                           vertex_size_slider.get())
 
 @dataclass
 class L(object):
@@ -136,13 +130,6 @@ class Scene(object):
 
     def render(self,
                camera: Camera) -> None:
-        # lines = reduce(lambda l1, l2: l1 + l2, map(lambda m: m.lines, self.models))
-        # if lines:
-        #     for line in lines:
-        #         line.render(camera)
-        # vertices = reduce(lambda v1, v2: v1 + v2, map(lambda m: m.vertices, self.models))
-        # for vertex in sorted(vertices, key=lambda v: v.brightness(camera)):
-        #     vertex.render(camera)
         for model in self.models:
             model.render(camera)
 
@@ -150,7 +137,6 @@ def parse_obj_model(path: str,
                     color: Tuple[int, int, int]) -> Model:
     with open(path, 'r') as object:
         data = object.read()
-        # print(data.split('\n'))
         vertices = []
         lines = []
         for line in data.split('\n'):
@@ -158,7 +144,6 @@ def parse_obj_model(path: str,
                 continue
             elif line[0:2] == 'v ':
                 params = line.split(' ')
-                # print(params)
                 vertices.append(V(float(params[1]), float(params[2]), float(params[3])))
             elif line[0:2] == 'f ':
                 params = line.split(' ')
@@ -180,49 +165,79 @@ def parse_obj_model(path: str,
                     lines.append(L(face[2], face[0]))
         return Model(vertices, lines, color)
 
-model = parse_obj_model('model.obj', (0, 255, 0))
-cube = parse_obj_model('cube.obj', (0, 0, 255))
+model = parse_obj_model('models/human.obj', (0, 255, 0))
+model.transform(lambda v: V(
+    v.x*.75,
+    v.y*.75,
+    v.z*.75,
+))
+cube = parse_obj_model('models/cube.obj', (0, 0, 255))
 cube.transform(lambda v: V(
-    v.x + 17,
+    v.x + 9,
     v.y + 8,
-    v.z + 10
+    v.z + 6
 ))
-pyramid = parse_obj_model('pyramid.obj', (255, 255, 0))
+pyramid = parse_obj_model('models/pyramid.obj', (255, 255, 0))
 pyramid.transform(lambda v: V(
-    v.x*7 - 13,
-    v.y*7 + 8,
-    v.z*7 + 10
+    v.x*6 - 10,
+    v.y*6 + 8,
+    v.z*6 + 6
 ))
-base_icosahedron = parse_obj_model('icosahedron.obj', (255, 0, 0))
+base_icosahedron = parse_obj_model('models/icosahedron.obj', (255, 0, 0))
 base_icosahedron.transform(
     lambda v: V(
-        v.x*6.0 - 19,
-        v.y*6.0 + 10,
-        v.z*6.0 + 8
+        v.x*3 - 13,
+        v.y*3 + 5,
+        v.z*3 + 8
     )
 )
 render_icosahedron = deepcopy(base_icosahedron)
 scene = Scene([cube, pyramid, render_icosahedron, model])
 
-speed = .05
-theta = .015*2
+speed_label = tk.Label(text='Camera speed')
+speed_label.pack()
+speed_slider = tk.Scale(from_=0, to=.5*100, orient=tk.HORIZONTAL)
+speed_slider.set(.05*100)
+speed_slider.pack()
+
+theta_label = tk.Label(text='Rotation speed')
+theta_label.pack()
+theta_slider = tk.Scale(from_=0, to=.5*100, orient=tk.HORIZONTAL)
+theta_slider.set(.015*2*100)
+theta_slider.pack()
 
 running = True
 clock = pygame.time.Clock()
 time = 0
-freq = 4000
+
+freq_label = tk.Label(text='Icosahedron frequency')
+freq_label.pack()
+freq_slider = tk.Scale(from_=1, to=10_000, orient=tk.HORIZONTAL)
+freq_slider.set(4000)
+freq_slider.pack()
 
 while running:
     delta = clock.tick(0)
     time += delta
+
+    speed = speed_slider.get() / 100
+    theta = theta_slider.get() / 100
+    freq = freq_slider.get()
+
     screen.fill((0, 0, 0))
 
     scene.render(camera)
 
-    screen.blit(rotations_text, rotations_text_rect)
-    screen.blit(rotations_image, (screen_size[0]//2 - rotations_image.get_width()//2, 9.5*screen_size[1]//12))
+    screen.blit(font.render(f'FPS: {round(clock.get_fps())}', True, (255, 255, 255)), (10, 10))
+
+    position = font.render(f'({round(camera.x)}, {round(camera.y)}, {round(camera.z)})', True, (255, 255, 255))
+    screen.blit(position, (screen_size[0] - position.get_width() - 10, 10))
+
+    angle = font.render(f'θx={round(camera.theta_x, 2)}; θy={round(camera.theta_y, 2)}', True, (255, 255, 255))
+    screen.blit(angle, (screen_size[0] - angle.get_width() - 10, 40))
 
     pygame.display.flip()
+    interface.update()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -268,11 +283,8 @@ while running:
         ))
     new_icosahedron = deepcopy(base_icosahedron)
     new_icosahedron.transform(lambda v: V(
-        ((v.x + 19)/6.0 * abs(cos(2*time/freq)))*6.0 - 19,
-        ((v.y - 10)/6.0 * abs(cos(2*time/freq)))*6.0 + 10,
-        ((v.z - 8)/6.0 * abs(cos(2*time/freq)))*6.0 + 8
+        ((v.x + 13)/3 * abs(cos(2*time/freq)))*3 - 13,
+        ((v.y - 5)/3 * abs(cos(2*time/freq)))*3 + 5,
+        ((v.z - 8)/3 * abs(cos(2*time/freq)))*3 + 8
     ))
     scene.models[2] = new_icosahedron
-
-    camera.theta_x = .5*sin(time/1500) if floor(time/(2*pi*1500)) % 2 == 0 else 0
-    camera.theta_y = .2*sin(time/1500) if floor(time/(2*pi*1500)) % 2 == 1 else 0
