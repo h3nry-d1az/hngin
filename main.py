@@ -27,6 +27,7 @@ class Camera(object):
     z: float
     theta_x: float = 0
     theta_y: float = 0
+    theta_z: float = 0
 
 interface = tk.Tk()
 interface.title('hngin -- settings bar')
@@ -38,11 +39,11 @@ FPS_slider = tk.Scale(from_=0, to=60, orient=tk.HORIZONTAL)
 FPS_slider.set(30)
 FPS_slider.pack()
 
-FOV_label = tk.Label(text='FOV (field of view)')
-FOV_label.pack()
-FOV_slider = tk.Scale(from_=0, to=2000, orient=tk.HORIZONTAL)
-FOV_slider.set(1000)
-FOV_slider.pack()
+focal_length_label = tk.Label(text='Focal length')
+focal_length_label.pack()
+focal_length_slider = tk.Scale(from_=0, to=2000, orient=tk.HORIZONTAL)
+focal_length_slider.set(1000)
+focal_length_slider.pack()
 
 # screen_size = (1280, 720)
 screen_size = (640, 480)
@@ -78,28 +79,30 @@ class V(object):
         self.z += z
 
     def project(self,
-                camera: Camera) -> Tuple[float, float]:
+                camera: Camera) -> Tuple[float, float] | None:
         x = (self.x - camera.x)
         y = (self.y - camera.y)
         z = (self.z - camera.z)
         tx = camera.theta_y
         ty = camera.theta_x
+        tz = camera.theta_z
         rotated = V(
-            z*sin(ty)*cos(tx) + y*sin(tx)*sin(ty) + x*cos(ty),
-            y*cos(tx) - z*sin(tx),
+            y*(sin(tx)*sin(ty)*cos(tz) - sin(tz)*cos(tx)) + z*(sin(ty)*cos(tx)*cos(tz) + sin(tx)*sin(tz)) + x*cos(ty)*cos(tz),
+            x*sin(tz)*cos(ty) + z*(sin(ty)*sin(tz)*cos(tx) - sin(tx)*cos(tz)) + y*(sin(tx)*sin(ty)*sin(tz) + cos(tx)*cos(tz)),
             -x*sin(ty) + y*sin(tx)*cos(ty) + z*cos(tx)*cos(ty)
         )
-        return cartesian_to_pygame((rotated.x * FOV_slider.get()) // rotated.z,
-                                   (rotated.y * FOV_slider.get()) // rotated.z)
+        if rotated.z < 0:
+            return None
+        return cartesian_to_pygame((rotated.x * focal_length_slider.get()) // rotated.z,
+                                   (rotated.y * focal_length_slider.get()) // rotated.z)
 
     def render(self,
                camera: Camera) -> None:
-        # if self.z <= camera.z:
-        #     return (0, 0)
-
+        if not (projected := self.project(camera)):
+            return
         pygame.draw.circle(screen,
                            (255, 255, 255),
-                           self.project(camera),
+                           projected,
                            vertex_size_slider.get())
 
 @dataclass
@@ -110,9 +113,10 @@ class L(object):
     def render(self,
                camera: Camera,
                color: Tuple[int, int, int]) -> None:
-        pygame.draw.line(screen, color,
-                         self.vertex_1.project(camera),
-                         self.vertex_2.project(camera))
+        if not (p1 := self.vertex_1.project(camera))\
+        or not (p2 := self.vertex_2.project(camera)):
+            return
+        pygame.draw.line(screen, color, p1, p2)
 
 @dataclass
 class Model(object):
@@ -175,7 +179,7 @@ def parse_obj_model(path: str,
                     lines.append(L(face[2], face[0]))
         return Model(vertices, lines, color)
 
-model_original = parse_obj_model('models/human.obj', (0, 255, 0))
+model_original = parse_obj_model('models/tree.obj', (0, 255, 0))
 model = deepcopy(model_original)
 model.transform(lambda v: V(
     v.x*.75,
@@ -230,7 +234,7 @@ freq_slider.pack()
 model_label = tk.Label(text='Rotating model')
 model_label.pack()
 model_entry = tk.Entry()
-model_entry.insert(0, 'models/human.obj')
+model_entry.insert(0, 'models/tree.obj')
 model_entry.pack()
 
 model_scale_label = tk.Label(text='Rotating model scale')
@@ -245,7 +249,7 @@ model_speed_slider = tk.Scale(from_=0, to=.001*10000, orient=tk.HORIZONTAL)
 model_speed_slider.set(.0003*10000)
 model_speed_slider.pack()
 
-model_value = 'models/human.obj'
+model_value = 'models/tree.obj'
 scale_value = 75
 
 while running:
@@ -266,8 +270,14 @@ while running:
     position = font.render(f'({round(camera.x)}, {round(camera.y)}, {round(camera.z)})', True, (255, 255, 255))
     screen.blit(position, (screen_size[0] - position.get_width() - 10, 10))
 
-    angle = font.render(f'θx={round(camera.theta_x, 2)}; θy={round(camera.theta_y, 2)}', True, (255, 255, 255))
-    screen.blit(angle, (screen_size[0] - angle.get_width() - 10, 40))
+    angle_x = font.render(f'θx={round(camera.theta_x, 2)}', True, (255, 255, 255))
+    screen.blit(angle_x, (screen_size[0] - angle_x.get_width() - 10, 40))
+
+    angle_y = font.render(f'θy={round(camera.theta_y, 2)}', True, (255, 255, 255))
+    screen.blit(angle_y, (screen_size[0] - angle_y.get_width() - 10, 70))
+
+    angle_z = font.render(f'θz={round(camera.theta_z, 2)}', True, (255, 255, 255))
+    screen.blit(angle_z, (screen_size[0] - angle_z.get_width() - 10, 100))
 
     pygame.display.flip()
     interface.update()
@@ -292,9 +302,9 @@ while running:
         camera.y -= sin(camera.theta_y)*speed*delta
         camera.z -= cos(camera.theta_x)*speed*delta
     # if keys[pygame.K_w]:
-    #     FOV += speed*delta
+    #     focal_length += speed*delta
     # if keys[pygame.K_s]:
-    #     FOV -= speed*delta
+    #     focal_length -= speed*delta
     if keys[pygame.K_a]:
         camera.theta_x += theta*delta
     if keys[pygame.K_d]:
