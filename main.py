@@ -32,6 +32,8 @@ class Camera(object):
 interface = tk.Tk()
 interface.title('hngin -- settings bar')
 interface.iconphoto(False, tk.PhotoImage(file='assets/hngin-favicon.png'))
+interface.geometry('127x544+1050+75')
+interface.resizable(False, False)
 
 FPS_label = tk.Label(text='Maximum FPS')
 FPS_label.pack()
