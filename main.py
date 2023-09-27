@@ -9,7 +9,7 @@
 from dataclasses import dataclass
 from typing import Tuple, List, Callable
 from copy import deepcopy
-from math import sin, cos
+from math import sin, cos, pi
 import pygame
 import tkinter as tk
 
@@ -219,8 +219,8 @@ speed_slider.pack()
 
 theta_label = tk.Label(text='Rotation speed')
 theta_label.pack()
-theta_slider = tk.Scale(from_=0, to=.001*10000, orient=tk.HORIZONTAL)
-theta_slider.set(.0003*10000)
+theta_slider = tk.Scale(from_=0, to=.002*10000, orient=tk.HORIZONTAL)
+theta_slider.set(.0007*10000)
 theta_slider.pack()
 
 running = True
@@ -272,14 +272,14 @@ while running:
     position = font.render(f'({round(camera.x)}, {round(camera.y)}, {round(camera.z)})', True, (255, 255, 255))
     screen.blit(position, (screen_size[0] - position.get_width() - 10, 10))
 
-    angle_x = font.render(f'θx={round(camera.theta_x, 2)}', True, (255, 255, 255))
+    angle_x = font.render(f'θ={round(camera.theta_x, 2)}', True, (255, 255, 255))
     screen.blit(angle_x, (screen_size[0] - angle_x.get_width() - 10, 40))
 
-    angle_y = font.render(f'θy={round(camera.theta_y, 2)}', True, (255, 255, 255))
-    screen.blit(angle_y, (screen_size[0] - angle_y.get_width() - 10, 70))
+    # angle_y = font.render(f'θy={round(camera.theta_y, 2)}', True, (255, 255, 255))
+    # screen.blit(angle_y, (screen_size[0] - angle_y.get_width() - 10, 70))
 
-    angle_z = font.render(f'θz={round(camera.theta_z, 2)}', True, (255, 255, 255))
-    screen.blit(angle_z, (screen_size[0] - angle_z.get_width() - 10, 100))
+    # angle_z = font.render(f'θz={round(camera.theta_z, 2)}', True, (255, 255, 255))
+    # screen.blit(angle_z, (screen_size[0] - angle_z.get_width() - 10, 100))
 
     pygame.display.flip()
     interface.update()
@@ -303,18 +303,14 @@ while running:
         camera.x += sin(camera.theta_x)*speed*delta
         camera.y -= sin(camera.theta_y)*speed*delta
         camera.z -= cos(camera.theta_x)*speed*delta
-    # if keys[pygame.K_w]:
-    #     focal_length += speed*delta
-    # if keys[pygame.K_s]:
-    #     focal_length -= speed*delta
     if keys[pygame.K_a]:
-        camera.theta_x += theta*delta
+        camera.theta_x = min(camera.theta_x + theta*delta, pi)
     if keys[pygame.K_d]:
-        camera.theta_x -= theta*delta
-    if keys[pygame.K_w]:
-        camera.theta_y += theta*delta
-    if keys[pygame.K_s]:
-        camera.theta_y -= theta*delta
+        camera.theta_x = max(camera.theta_x - theta*delta, -pi)
+    # if keys[pygame.K_w]:
+    #     camera.theta_y += theta*delta
+    # if keys[pygame.K_s]:
+    #     camera.theta_y -= theta*delta
     if keys[pygame.K_SPACE]:
         camera.y += speed*delta
     if (keys[pygame.K_LSHIFT]) or \
