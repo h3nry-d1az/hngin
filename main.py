@@ -28,6 +28,7 @@ class Camera(object):
     theta_x: float = 0
     theta_y: float = 0
     theta_z: float = 0
+    vertical_angle: float = 0
 
 interface = tk.Tk()
 interface.title('hngin -- settings bar')
@@ -89,9 +90,9 @@ class V(object):
         ty = camera.theta_x
         tz = camera.theta_z
         rotated = V(
-            y*(sin(tx)*sin(ty)*cos(tz) - sin(tz)*cos(tx)) + z*(sin(ty)*cos(tx)*cos(tz) + sin(tx)*sin(tz)) + x*cos(ty)*cos(tz),
-            x*sin(tz)*cos(ty) + z*(sin(ty)*sin(tz)*cos(tx) - sin(tx)*cos(tz)) + y*(sin(tx)*sin(ty)*sin(tz) + cos(tx)*cos(tz)),
-            -x*sin(ty) + y*sin(tx)*cos(ty) + z*cos(tx)*cos(ty)
+            z*sin(ty)*cos(tx) + y*(sin(tx)*sin(ty)*cos(tz) - sin(tz)*cos(ty)) + x*(sin(tx)*sin(ty)*sin(tz) + cos(ty)*cos(tz)),
+            -z*sin(tx) + x*sin(tz)*cos(tx) + y*cos(tx)*cos(tz),
+            x*(sin(tx)*sin(tz)*cos(ty) - sin(ty)*cos(tz)) + y*(sin(tx)*cos(ty)*cos(tz) + sin(ty)*sin(tz)) + z*cos(tx)*cos(ty)
         )
         if rotated.z < 0:
             return None
@@ -272,14 +273,14 @@ while running:
     position = font.render(f'({round(camera.x)}, {round(camera.y)}, {round(camera.z)})', True, (255, 255, 255))
     screen.blit(position, (screen_size[0] - position.get_width() - 10, 10))
 
-    angle_x = font.render(f'θ={round(camera.theta_x, 2)}', True, (255, 255, 255))
+    angle_x = font.render(f'θx={round(camera.theta_y, 2)}', True, (255, 255, 255))
     screen.blit(angle_x, (screen_size[0] - angle_x.get_width() - 10, 40))
 
-    # angle_y = font.render(f'θy={round(camera.theta_y, 2)}', True, (255, 255, 255))
-    # screen.blit(angle_y, (screen_size[0] - angle_y.get_width() - 10, 70))
+    angle_y = font.render(f'θy={round(camera.theta_x, 2)}', True, (255, 255, 255))
+    screen.blit(angle_y, (screen_size[0] - angle_y.get_width() - 10, 70))
 
-    # angle_z = font.render(f'θz={round(camera.theta_z, 2)}', True, (255, 255, 255))
-    # screen.blit(angle_z, (screen_size[0] - angle_z.get_width() - 10, 100))
+    angle_z = font.render(f'θz={round(camera.theta_z, 2)}', True, (255, 255, 255))
+    screen.blit(angle_z, (screen_size[0] - angle_z.get_width() - 10, 100))
 
     pygame.display.flip()
     interface.update()
@@ -307,15 +308,30 @@ while running:
         camera.theta_x = min(camera.theta_x + theta*delta, pi)
     if keys[pygame.K_d]:
         camera.theta_x = max(camera.theta_x - theta*delta, -pi)
+    if keys[pygame.K_w]:
+        camera.vertical_angle = min(camera.vertical_angle + theta*delta, pi)
+    if keys[pygame.K_s]:
+        camera.vertical_angle = max(camera.vertical_angle - theta*delta, -pi)
+    # if keys[pygame.K_q]:
+    #     camera.theta_y = min(camera.theta_y + theta*delta, pi)
+    # if keys[pygame.K_a]:
+    #     camera.theta_y = max(camera.theta_y - theta*delta, -pi)
     # if keys[pygame.K_w]:
-    #     camera.theta_y += theta*delta
+    #     camera.theta_x = min(camera.theta_x + theta*delta, pi)
     # if keys[pygame.K_s]:
-    #     camera.theta_y -= theta*delta
+    #     camera.theta_x = max(camera.theta_x - theta*delta, -pi)
+    # if keys[pygame.K_e]:
+    #     camera.theta_z = min(camera.theta_z + theta*delta, pi)
+    # if keys[pygame.K_d]:
+    #     camera.theta_z = max(camera.theta_z - theta*delta, -pi)
     if keys[pygame.K_SPACE]:
         camera.y += speed*delta
     if (keys[pygame.K_LSHIFT]) or \
        (keys[pygame.K_RSHIFT]):
         camera.y -= speed*delta
+
+    camera.theta_y = camera.vertical_angle*cos(camera.theta_x)
+    camera.theta_z = camera.vertical_angle*sin(camera.theta_x)
 
     if (mt := model_entry.get()) != model_value:
         try:
