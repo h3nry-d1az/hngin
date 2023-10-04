@@ -9,7 +9,7 @@
 
 **ʜɴɢɪɴ** is an attempt to implement a three-dimensional rendering engine from scratch, based mainly on my intuition, my limited knowledge of linear algebra and some research and information gathering that I have carried out in order to achieve certain functionalities.
 
-As can be inferred from the current state of the project, it should be treated for the moment as a proof of concept rather than a stable and secure product, since there are still many functionalities to be implemented that are necessary in any rendering engine (see the [to-do]() section), as well as some possible bugs to cover, improve the code in many aspects and write documentation for all the features and operation of the software (however, for a greater understanding of this aspect one can go to the [intuition behind the engine]() section); It is also necessary to mention the detail that this program is written entirely in Python, which makes it relatively slow in comparison, although somewhat easier to read.
+As can be inferred from the current state of the project, it should be treated for the moment as a proof of concept rather than a stable and secure product, since there are still many functionalities to be implemented that are necessary in any rendering engine (see the [to-do](https://github.com/h3nry-d1az/hngin#project-roadmap) section), as well as some possible bugs to cover, improve the code in many aspects and write documentation for all the features and operation of the software (however, for a greater understanding of this aspect one can go to the [intuition behind the engine](https://github.com/h3nry-d1az/hngin#intuition-behind-the-engine-code) section); It is also necessary to mention the detail that this program is written entirely in Python, which makes it relatively slow in comparison, although somewhat easier to read.
 
 However, and as a result of the relatively important progress that I have been achieving in this project, I have decided to make it public and freely accessible in order to facilitate its use and to be able to receive suggestions, feedback and contributions from interested users.
 
@@ -19,10 +19,10 @@ However, and as a result of the relatively important progress that I have been a
 <summary>Section table of contents</summary>
 <br>
 
-1. [Clone the repository]()
-2. [Getting the necessary dependencies.]()
-3. [Running the engine source code.]()
-4. [Visual results of the program.]()
+1. [Clone the repository](https://github.com/h3nry-d1az/hngin#clone-the-repository)
+2. [Getting the necessary dependencies.](https://github.com/h3nry-d1az/hngin#getting-the-necessary-dependencies)
+3. [Running the engine source code.](https://github.com/h3nry-d1az/hngin#running-the-engine-source-code)
+4. [Visual results of the program.](https://github.com/h3nry-d1az/hngin#visual-results-of-the-program)
 
 </details>
 
