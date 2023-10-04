@@ -79,9 +79,24 @@ Even though enough features have been implemented within the engine to have been
 <summary>Section table of contents</summary>
 <br>
 
-1. []()
+1. [Introduction.]()
+2. .
+3. [Works Cited]()
 
 </details>
+
+#### Introduction
+The idea behind **ʜɴɢɪɴ** lies in, first, modeling three-dimensional objects through mathematical structures with which we can then operate (for example, move the models or rotate them), and manipulate this three-dimensional space to project it into a two-dimensional one, since we can draw this on the screen easily using the pygame library mentioned above.
+
+#### Modeling the vertices of an object
+By its own definition, every vertex of a three-dimensional object consists of three coordinates: $x$, $y$ and $z$[[1](), [2]()], then we can model this vertex as a three-dimensional vector (of three components), linking this concept to the results of linear algebra and being able to operate with vertices of mathematical way. More rigorously, every vertex with coordinates $x$, $y$, $z$ corresponds to one and only one vector $\mathbf{p} = [x, y, z]$ such that $\mathbf{p} \in \mathbb{R}^3$. We will represent a vertex $\mathbf{p}$ on the screen as a point in the coordinates of the projection of $\mathbf{p}$ in two dimensions.
+
+#### Modeling faces as edges (vertex unions)
+As mentioned in resources [[1]()] and [[2]()], three-dimensional objects (at least those in .obj format) are also composed of faces (triangles), however, we can simplify these as three edges that join three points, then our job is reduced to modeling these edges. Given $\mathbf{p}$ and $\mathbf{q}$ vertices, we will define an edge $\overline{\mathbf{p}\mathbf{q}}$ as a line segment that begins at $\mathbf{p}$ and ends at $\mathbf{q}$, that is, that joins $\mathbf{p}$ with $\mathbf{q}$. Note that it is commutative, so $\overline{\mathbf{p}\mathbf{q}} = \overline{\mathbf{q}\mathbf{p}}$, since the line segment is not oriented.
+
+#### Works Cited
+1. http://web.cse.ohio-state.edu/~shen.94/581/Site/Lab3_files/Labhelp_Obj_parser.htm
+2. https://cs418.cs.illinois.edu/website/text/obj.html
 
 ## [License](https://github.com/h3nry-d1az/hngin/blob/main/LICENSE)
 MIT License
