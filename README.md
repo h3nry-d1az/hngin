@@ -54,9 +54,7 @@ Which should cause two windows to be displayed on the screen, a rectangular one 
 #### Visual results of the program
 The aforementioned windows should look as shown below:
 
-<video> 
-  <source src="" type="video/mp4"> 
-</video>
+https://github.com/h3nry-d1az/hngin/assets/61124185/0ac1b641-49ef-4895-84fa-b3f9caf83bbf
 
 ## Project roadmap
 Even though enough features have been implemented within the engine to have been able to make the decision to make it public, most of the functionalities that I would like to see implemented and that I think would be feasible are not yet implemented. Therefore, below is the roadmap designed for the project (although without any date, it is more than likely that not all of them will end up being fulfilled):
