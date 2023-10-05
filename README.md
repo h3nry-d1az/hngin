@@ -23,7 +23,7 @@ However, and as a result of the relatively important progress that I have been a
 2. [Getting the necessary dependencies.](https://github.com/h3nry-d1az/hngin#getting-the-necessary-dependencies)
 3. [Running the engine source code.](https://github.com/h3nry-d1az/hngin#running-the-engine-source-code)
 4. [Visual results of the program.](https://github.com/h3nry-d1az/hngin#visual-results-of-the-program)
-5. [Packaging the program in an executable binary.]()
+5. [Packaging the program in an executable binary.](https://github.com/h3nry-d1az/hngin#packaging-the-program-in-an-executable-binary)
 
 </details>
 
@@ -93,9 +93,13 @@ Even though enough features have been implemented within the engine to have been
 <summary>Section table of contents</summary>
 <br>
 
-1. [Introduction.]()
-2. .
-3. [Works Cited.]()
+1. [Introduction.](https://github.com/h3nry-d1az/hngin#introduction)
+2. [Modeling the vertices of an object.](https://github.com/h3nry-d1az/hngin#modeling-the-vertices-of-an-object)
+3. [Modeling faces as edges (vertex unions).](https://github.com/h3nry-d1az/hngin#modeling-faces-as-edges-vertex-unions)
+4. [Projecting the vertices and edges.](https://github.com/h3nry-d1az/hngin#projecting-the-vertices-and-edges)
+5. [A detail to keep in mind.](https://github.com/h3nry-d1az/hngin#a-detail-to-keep-in-mind)
+6. [Camera rotations.](https://github.com/h3nry-d1az/hngin/edit/main/README.md#camera-rotations)
+7. [Works Cited.](https://github.com/h3nry-d1az/hngin#works-cited)
 
 </details>
 
@@ -159,6 +163,9 @@ From this section on, when we refer to a vertex (vector) and its transformations
 
   
 </div>
+
+#### Camera rotations
+...
 
 #### Works Cited
 1. http://web.cse.ohio-state.edu/~shen.94/581/Site/Lab3_files/Labhelp_Obj_parser.htm
