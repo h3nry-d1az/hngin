@@ -170,7 +170,7 @@ The most trivial (although valid, and the one I ended up using) approach one can
 This, however, raises two not so obvious questions: first, how to rotate a three-dimensional vector properly (as we will see later, in what order to apply the rotation matrices), and also, that the aforementioned 3D space consists of three axes, that is, six possible directions of rotation, while (ideally, and as it works in most systems) we only have four keys, two for vertical movement and another two for horizontal movement.
 
 ###### Rotate a three-dimensional vector
-We will begin by resolving the first of the aforementioned questions. The space $\mathbb{R}^3$ has, as we have already mentioned, three coordinate axes: $X$, $Y$ and $Z$, therefore we can consider three different axes of rotation when rotating any vector $\mathbf{p}$, that is, there are three different rotation matrices we can employ in order to revolve our given $\mathbf{p}$ (one for each axis) [[7](https://github.com/h3nry-d1az/hngin#works-cited)]:
+We will begin by resolving the first of the said questions. The space $\mathbb{R}^3$ has, as we have already mentioned, three coordinate axes: $X$, $Y$ and $Z$, therefore we can consider three different axes of rotation when rotating any vector $\mathbf{p}$, that is, there are three different rotation matrices we can employ in order to revolve our given $\mathbf{p}$ (one for each axis) [[7](https://github.com/h3nry-d1az/hngin#works-cited)]:
 
 <div align="center">
 
@@ -221,6 +221,25 @@ And finally projected on screen:
 ![rotated_and_projected](https://github.com/h3nry-d1az/hngin/assets/61124185/d95035ce-21d6-4484-8958-f507586025e2)
 
 </div>
+
+###### Camera rotation controls
+Once we can rotate the camera properly, we have to simplify the necessary controls to only depend on four keys instead of six, that is, two that control the vertical rotation and two that control the horizontal one, instead of two for each axis.
+
+The horizontal rotation is simple, because it remains the same as the rotation around the $Y$ axis, since it is independent of the others in the sense that, no matter the position of the camera, it will always work properly. We can assign two keys then to increment and decrement the $\theta_y$ angle.
+
+Vertical rotation, however, is more complicated, since it is necessary to rotate around the $X$ and/or $Z$ axis, which depends on the value of $\theta_y$. When the camera is at the origin without having made any rotation, we are observing along the $Z$ axis, since this is the depth axis, while when we rotate our camera $\pm\frac{\pi}{2}$ radians, we are observing along the $X$ axis. That an element is located on the $Z$ axis requires a rotation around the $X$ axis so that the effect of verticality can be appreciated, since a rotation around $Z$ will produce the effect seen in the bad rotation example shown above, and vice versa happens with an element located in $X$, it will require a rotation around $Z$.
+
+For now, we can create a special angle called $\lambda$ which stores the total vertical rotation, later we will convert it to $\theta_x$ and $\theta_z$. We will use two keys to increase and decrease the $\lambda$ value.
+
+Now, when $\theta_y$ is 0 and we rotate vertically, we increment $\theta_x$ completely and do not touch $\theta_z$, while when $\theta_y$ takes the value of $\pm\frac{\pi}{2}$, $\theta_z$ increments completely and $\theta_x$ does not. For any angle $\theta_y$, we can then generalize and define $\theta_x$ and $\theta_z$ in terms of $\theta_y$ and $\lambda$ using trigonometry:
+
+<div align="center">
+
+  ![thetax_thetaz_lambda](https://github.com/h3nry-d1az/hngin/assets/61124185/29bbfef2-f207-465c-bcfe-ae9de4806572)
+
+</div>
+
+Finally, to avoid graphical errors, we will keep the $\theta_x$, $\theta_y$ and $\theta_z$ angles ($\theta_y$ and $\lambda$) always in the interval $[-\pi, \pi]$.
 
 #### Works Cited
 1. http://web.cse.ohio-state.edu/~shen.94/581/Site/Lab3_files/Labhelp_Obj_parser.htm
