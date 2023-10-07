@@ -55,7 +55,9 @@ Which should cause two windows to be displayed on the screen, a rectangular one 
 #### Visual results of the program
 The aforementioned windows should look as shown below:
 
-https://github.com/h3nry-d1az/hngin/assets/61124185/0ac1b641-49ef-4895-84fa-b3f9caf83bbf
+
+https://github.com/h3nry-d1az/hngin/assets/61124185/b1d58bfe-ab9c-4c51-890c-cdd01d74485a
+
 
 #### Packaging the program in an executable binary
 To compile the source code of the **ʜɴɢɪɴ** demo program to an executable binary, you will require the PyInstaller package on your machine, you can get it by running the following command:
@@ -120,8 +122,8 @@ The first approach that one can take when facing this problem is to simply delet
 
 <div align="center">
 
-  ![orthogonal](https://github.com/h3nry-d1az/hngin/assets/61124185/89c1bec5-6757-40b7-91ae-032dd7ae62ec)
-  
+  ![orthogonal](https://github.com/h3nry-d1az/hngin/assets/61124185/6e14e547-6b1b-4c55-902b-f4de7485aa39)
+
 </div>
 
 This procedure is called orthogonal projection [[3](https://github.com/h3nry-d1az/hngin#works-cited)], and although the intuition behind it is simple, the result, although clearly not perfect (I mean, the lack of depth and perspective is evident), is a valid starting point.
@@ -133,7 +135,7 @@ To try to summarize and simplify this paragraph, we compare our screen with a wi
 
 <div align="center">
 
-  ![lerp](https://github.com/h3nry-d1az/hngin/assets/61124185/080d03c2-827f-44f6-ac38-b04eb59a8f31)
+![lerp](https://github.com/h3nry-d1az/hngin/assets/61124185/761d8e7b-57ff-42f4-b512-a95d8e1427da)
 
 </div>
 
@@ -141,7 +143,7 @@ Since the window is our screen, we can delete the $z$ coordinate and render the 
 
 <div align="center">
 
-  ![orto-lerp](https://github.com/h3nry-d1az/hngin/assets/61124185/84a72cb6-b429-4261-bfc6-6d65100aec96)
+![orto-lerp](https://github.com/h3nry-d1az/hngin/assets/61124185/d8201250-ad97-46e2-bcdf-de496b175456)
 
 </div>
 
@@ -151,17 +153,15 @@ And the resulting two-dimensional vector $\mathbf{p}'$ is the point to be render
 One must keep in mind that any point with a $z$ coordinate lower than that of the camera must not be rendered (nor the previous formulas applied), as it would cause graphic errors mainly when drawing the edges on the screen. I reiterate, with a $z$ coordinate less than that of the camera, that is, less than zero, since we are working with the camera being fixed at the origin; if it could be moved, you would simply have to subtract the vector in question and the vector with the camera position:
 <div align="center">
 
-![normalized-point](https://github.com/h3nry-d1az/hngin/assets/61124185/833311d2-b292-40d7-a113-56c6b7008fae)
+![normalized-point](https://github.com/h3nry-d1az/hngin/assets/61124185/dde32f5e-66fc-4757-b40a-837bf184b119)
 
-  
 </div>
 
 From this section on, when we refer to a vertex (vector) and its transformations, it must be normalized. Once the operations have been carried out, we can obtain the original vector again by adding the camera position vector to it:
 <div align="center">
 
-![original-point](https://github.com/h3nry-d1az/hngin/assets/61124185/cbb94969-0d8a-4699-8a7e-8b515dd32dea)
+![original-point](https://github.com/h3nry-d1az/hngin/assets/61124185/c5c51ebd-777b-4057-928d-23c906493268)
 
-  
 </div>
 
 #### Camera rotations
@@ -174,43 +174,45 @@ We will begin by resolving the first of the said questions. The space $\mathbb{R
 
 <div align="center">
 
-  ![rotation_x](https://github.com/h3nry-d1az/hngin/assets/61124185/c0b2770a-908f-4a67-9495-90b8a8e11a00)
+![rotation_x](https://github.com/h3nry-d1az/hngin/assets/61124185/b3241dd0-6579-4701-8fb2-70a6a08d089b)
 
-  ![rotation_y](https://github.com/h3nry-d1az/hngin/assets/61124185/ef5d4e76-accf-42bb-a527-207248b1fddf)
+![rotation_y](https://github.com/h3nry-d1az/hngin/assets/61124185/8b5d0192-c5d2-411f-95d4-bf58e9c20815)
 
-  ![rotation_z](https://github.com/h3nry-d1az/hngin/assets/61124185/55efe072-680a-48ca-ac2b-3ac34e6a4be2)
+![rotation_z](https://github.com/h3nry-d1az/hngin/assets/61124185/82f2fa06-c758-4b46-8ec4-9a3098d83bcf)
 
 </div>
 
 As it is possible to infer, we need to rotate each vector around each of the three axes (with a rotation angle probably different for each of them), which implies applying each of these three matrices consecutively, or what is the same, apply the composition (product) of the three, that is, an even larger matrix.
 
-<img align="left" src="https://github.com/h3nry-d1az/hngin/assets/61124185/8cbc4931-01c9-4baf-a4ad-c27913c639f0" alt="the-world-if-meme" height="35%" width="35%"/>
+<img align="left" src="https://github.com/h3nry-d1az/hngin/assets/61124185/f3ddfeee-928d-4d08-8af8-44c3097f9045" alt="the-world-if-meme" height="35%" width="35%"/>
 
 The problem comes, however, that the product of these matrices is not commutative, that is, the order in which we apply these rotations matters, then rotate 27º around the $X$ axis, then 84º around the $Y$ and finally 11º around to $Z$, is not the same as 11º around $Z$, then 84º around $Y$ and finally 27º with respect to $X$. So, in what order should we apply these matrices? Most of the resources I consulted suggested applying $R_X$ first, then $R_Y$ and finally $R_Z$ [[7](https://github.com/h3nry-d1az/hngin#works-cited), [8](https://github.com/h3nry-d1az/hngin#works-cited), [10](https://github.com/h3nry-d1az/hngin#works-cited)] (I now understand that they were referring to another type of rotation, but not by then), except for one in particular that stated to first apply $R_Y$, then $R_X$ and finally $R_Z$ [[9](https://github.com/h3nry-d1az/hngin#works-cited)].
 
 However, none of these methods worked, giving me wrong perspectives of the elements on the screen, which was because the rotation around the $Z$ axis was not working, looking like the example shown below:
 
-https://github.com/h3nry-d1az/hngin/assets/61124185/3d0cf694-03d4-4dd5-9385-4692ce3cd4d5
+https://github.com/h3nry-d1az/hngin/assets/61124185/f81e3a63-8dd9-439e-b34e-32544461e423
 
 Thinking about it, if we first rotate around the $X$ and $Y$ axes, any element that is on the $X$ axis or, in general, in any position, and that we are looking at will be located right on the $Z$ axis, then applying a rotation around the $Z$ axis will make it rotate in the undesired way seen previously.
 
 The solution? Get rid of the rotation around the $Z$ axis as soon as possible, that is, rotate about the aforementioned axis first, and then apply the rotation in $X$ and finally in $Y$. This method is the one that I ended up using and that, in truth, it works, getting results like the ones shown below:
 
-https://github.com/h3nry-d1az/hngin/assets/61124185/04c1c763-a849-4676-872f-36a518f303c4
+
+https://github.com/h3nry-d1az/hngin/assets/61124185/357b3341-2b30-4e7c-a049-24f7601157f3
+
 
 In general, for a vertex $\mathbf{p}$ and camera rotation angles $\theta_x$, $\theta_y$ and $\theta_z$, the three-dimensional vector resulting from the rotation process will be:
 
 <div align="center">
 
-  ![rotated](https://github.com/h3nry-d1az/hngin/assets/61124185/7537b867-ed00-40c4-82c5-806c202b6e4c)
-  
+![rotated](https://github.com/h3nry-d1az/hngin/assets/61124185/194d654e-d09d-4391-873a-4cda8f88e243)
+
 </div>
 
 Which, computed, has the following appearance:
 
 <div align="center">
 
-  ![rotation_computed](https://github.com/h3nry-d1az/hngin/assets/61124185/68aead15-a739-41f0-8e56-7b5f83e45465)
+![rotation_computed](https://github.com/h3nry-d1az/hngin/assets/61124185/3c6ea1e8-ed05-4471-88c8-7c3540048b65)
 
 </div>
 
@@ -218,7 +220,7 @@ And finally projected on screen:
 
 <div align="center">
 
-![rotated_and_projected](https://github.com/h3nry-d1az/hngin/assets/61124185/d95035ce-21d6-4484-8958-f507586025e2)
+![rotated_and_projected](https://github.com/h3nry-d1az/hngin/assets/61124185/88c201f7-b09d-42b6-964a-678610e19173)
 
 </div>
 
@@ -235,7 +237,7 @@ Now, when $\theta_y$ is 0 and we rotate vertically, we increment $\theta_x$ comp
 
 <div align="center">
 
-  ![thetax_thetaz_lambda](https://github.com/h3nry-d1az/hngin/assets/61124185/29bbfef2-f207-465c-bcfe-ae9de4806572)
+![thetax_thetaz_lambda](https://github.com/h3nry-d1az/hngin/assets/61124185/971c4c61-1205-4433-b035-391ed0035d32)
 
 </div>
 
