@@ -98,7 +98,7 @@ Even though enough features have been implemented within the engine to have been
 3. [Modeling faces as edges (vertex unions).](https://github.com/h3nry-d1az/hngin#modeling-faces-as-edges-vertex-unions)
 4. [Projecting the vertices and edges.](https://github.com/h3nry-d1az/hngin#projecting-the-vertices-and-edges)
 5. [A detail to keep in mind.](https://github.com/h3nry-d1az/hngin#a-detail-to-keep-in-mind)
-6. [Camera rotations.](https://github.com/h3nry-d1az/hngin/edit/main/README.md#camera-rotations)
+6. [Camera rotations.](https://github.com/h3nry-d1az/hngin#camera-rotations)
 7. [Works Cited.](https://github.com/h3nry-d1az/hngin#works-cited)
 
 </details>
@@ -165,7 +165,62 @@ From this section on, when we refer to a vertex (vector) and its transformations
 </div>
 
 #### Camera rotations
-...
+The most trivial (although valid, and the one I ended up using) approach one can take when implementing camera rotations in a three-dimensional space is to simply rotate the rest of the stage in the opposite direction, that is, rotate the camera to the left involves rotating the scene to the right, or rotating it up involves rotating it down.
+
+This, however, raises two not so obvious questions: first, how to rotate a three-dimensional vector properly (as we will see later, in what order to apply the rotation matrices), and also, that the aforementioned 3D space consists of three axes, that is, six possible directions of rotation, while (ideally, and as it works in most systems) we only have four keys, two for vertical movement and another two for horizontal movement.
+
+###### Rotate a three-dimensional vector
+We will begin by resolving the first of the aforementioned questions. The space $\mathbb{R}^3$ has, as we have already mentioned, three coordinate axes: $X$, $Y$ and $Z$, therefore we can consider three different axes of rotation when rotating any vector $\mathbf{p}$, that is, there are three different rotation matrices we can employ in order to revolve our given $\mathbf{p}$ (one for each axis) [[7](https://github.com/h3nry-d1az/hngin#works-cited)]:
+
+<div align="center">
+
+  ![rotation_x](https://github.com/h3nry-d1az/hngin/assets/61124185/c0b2770a-908f-4a67-9495-90b8a8e11a00)
+
+  ![rotation_y](https://github.com/h3nry-d1az/hngin/assets/61124185/ef5d4e76-accf-42bb-a527-207248b1fddf)
+
+  ![rotation_z](https://github.com/h3nry-d1az/hngin/assets/61124185/55efe072-680a-48ca-ac2b-3ac34e6a4be2)
+
+</div>
+
+As it is possible to infer, we need to rotate each vector around each of the three axes (with a rotation angle probably different for each of them), which implies applying each of these three matrices consecutively, or what is the same, apply the composition (product) of the three, that is, an even larger matrix.
+
+<img align="left" src="https://github.com/h3nry-d1az/hngin/assets/61124185/8cbc4931-01c9-4baf-a4ad-c27913c639f0" alt="the-world-if-meme" height="35%" width="35%"/>
+
+The problem comes, however, that the product of these matrices is not commutative, that is, the order in which we apply these rotations matters, then rotate 27º around the $X$ axis, then 84º around the $Y$ and finally 11º around to $Z$, is not the same as 11º around $Z$, then 84º around $Y$ and finally 27º with respect to $X$. So, in what order should we apply these matrices? Most of the resources I consulted suggested applying $R_X$ first, then $R_Y$ and finally $R_Z$ [[7](https://github.com/h3nry-d1az/hngin#works-cited), [8](https://github.com/h3nry-d1az/hngin#works-cited), [10](https://github.com/h3nry-d1az/hngin#works-cited)] (I now understand that they were referring to another type of rotation, but not by then), except for one in particular that stated to first apply $R_Y$, then $R_X$ and finally $R_Z$ [[9](https://github.com/h3nry-d1az/hngin#works-cited)].
+
+However, none of these methods worked, giving me wrong perspectives of the elements on the screen, which was because the rotation around the $Z$ axis was not working, looking like the example shown below:
+
+https://github.com/h3nry-d1az/hngin/assets/61124185/3d0cf694-03d4-4dd5-9385-4692ce3cd4d5
+
+Thinking about it, if we first rotate around the $X$ and $Y$ axes, any element that is on the $X$ axis or, in general, in any position, and that we are looking at will be located right on the $Z$ axis, then applying a rotation around the $Z$ axis will make it rotate in the undesired way seen previously.
+
+The solution? Get rid of the rotation around the $Z$ axis as soon as possible, that is, rotate about the aforementioned axis first, and then apply the rotation in $X$ and finally in $Y$. This method is the one that I ended up using and that, in truth, it works, getting results like the ones shown below:
+
+https://github.com/h3nry-d1az/hngin/assets/61124185/04c1c763-a849-4676-872f-36a518f303c4
+
+In general, for a vertex $\mathbf{p}$ and camera rotation angles $\theta_x$, $\theta_y$ and $\theta_z$, the three-dimensional vector resulting from the rotation process will be:
+
+<div align="center">
+
+  ![rotated](https://github.com/h3nry-d1az/hngin/assets/61124185/7537b867-ed00-40c4-82c5-806c202b6e4c)
+  
+</div>
+
+Which, computed, has the following appearance:
+
+<div align="center">
+
+  ![rotation_computed](https://github.com/h3nry-d1az/hngin/assets/61124185/68aead15-a739-41f0-8e56-7b5f83e45465)
+
+</div>
+
+And finally projected on screen:
+
+<div align="center">
+
+![rotated_and_projected](https://github.com/h3nry-d1az/hngin/assets/61124185/d95035ce-21d6-4484-8958-f507586025e2)
+
+</div>
 
 #### Works Cited
 1. http://web.cse.ohio-state.edu/~shen.94/581/Site/Lab3_files/Labhelp_Obj_parser.htm
@@ -174,6 +229,10 @@ From this section on, when we refer to a vertex (vector) and its transformations
 4. https://math.stackexchange.com/questions/2305792/3d-projection-on-a-2d-plane-weak-maths-ressources
 5. http://hyperphysics.phy-astr.gsu.edu/hbase/geoopt/foclen.html
 6. https://people.math.harvard.edu/~ctm/home/text/class/harvard/113/97/html/euclid.html
+7. http://motion.pratt.duke.edu/RoboticSystems/3DRotations.html
+8. https://en.wikipedia.org/wiki/Rotation_matrix
+9. https://en.scratch-wiki.info/wiki/How_to_Make_a_Three-Dimensional_Project#Rotation
+10. https://dominicplein.medium.com/extrinsic-intrinsic-rotation-do-i-multiply-from-right-or-left-357c38c1abfd
 
 ## [License](https://github.com/h3nry-d1az/hngin/blob/main/LICENSE)
 MIT License
