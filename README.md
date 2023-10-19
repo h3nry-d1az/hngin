@@ -244,16 +244,16 @@ Now, when $\theta_y$ is 0 and we rotate vertically, we increment $\theta_x$ comp
 Finally, to avoid graphical errors, we will keep the $\theta_x$, $\theta_y$ and $\theta_z$ angles ($\theta_y$ and $\lambda$) always in the interval $[-\pi, \pi]$.
 
 #### Works Cited
-1. http://web.cse.ohio-state.edu/~shen.94/581/Site/Lab3_files/Labhelp_Obj_parser.htm
-2. https://cs418.cs.illinois.edu/website/text/obj.html
-3. https://textbooks.math.gatech.edu/ila/projections.html
-4. https://math.stackexchange.com/questions/2305792/3d-projection-on-a-2d-plane-weak-maths-ressources
-5. http://hyperphysics.phy-astr.gsu.edu/hbase/geoopt/foclen.html
-6. https://people.math.harvard.edu/~ctm/home/text/class/harvard/113/97/html/euclid.html
-7. http://motion.pratt.duke.edu/RoboticSystems/3DRotations.html
-8. https://en.wikipedia.org/wiki/Rotation_matrix
-9. https://en.scratch-wiki.info/wiki/How_to_Make_a_Three-Dimensional_Project#Rotation
-10. https://dominicplein.medium.com/extrinsic-intrinsic-rotation-do-i-multiply-from-right-or-left-357c38c1abfd
+1. *Guidance to write a parser for .Obj and mtl file*, http://web.cse.ohio-state.edu/~shen.94/581/Site/Lab3_files/Labhelp_Obj_parser.htm. Accessed 3 October 2023.
+2. *CS 418 - Parsing OBJ Files*, 17 April 2023, https://cs418.cs.illinois.edu/website/text/obj.html. Accessed 3 October 2023.
+3. Margalit, Dan, and Joseph Rabinoff. *Orthogonal Projection*, https://textbooks.math.gatech.edu/ila/projections.html. Accessed 4 October 2023.
+4. “3D projection on a 2D plane ( weak maths ressources ).” *Mathematics Stack Exchange*, 1 June 2017, https://math.stackexchange.com/questions/2305792/3d-projection-on-a-2d-plane-weak-maths-ressources. Accessed 4 October 2023.
+5. “Focal Length of a Lens.” *HyperPhysics Concepts*, http://hyperphysics.phy-astr.gsu.edu/hbase/geoopt/foclen.html. Accessed 4 October 2023.
+6. *Euclid's Postulates*, https://people.math.harvard.edu/~ctm/home/text/class/harvard/113/97/html/euclid.html. Accessed 4 October 2023.
+7. *3DRotations*, http://motion.pratt.duke.edu/RoboticSystems/3DRotations.html. Accessed 6 October 2023.
+8. “Rotation matrix.” *Wikipedia*, https://en.wikipedia.org/wiki/Rotation_matrix. Accessed 6 October 2023.
+9. “How to Make a Three-Dimensional Project.” *Scratch Wiki*, 2 July 2023, https://en.scratch-wiki.info/wiki/How_to_Make_a_Three-Dimensional_Project#Rotation. Accessed 6 October 2023.
+10. Plein, Dominic. “Extrinsic & intrinsic rotation: Do I multiply from right or left?” Dominic Plein, 2 May 2022, https://dominicplein.medium.com/extrinsic-intrinsic-rotation-do-i-multiply-from-right-or-left-357c38c1abfd. Accessed 6 October 2023.
 
 ## [License](https://github.com/h3nry-d1az/hngin/blob/main/LICENSE)
 MIT License
