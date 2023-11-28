@@ -6,8 +6,8 @@
 # https://cs418.cs.illinois.edu/website/text/obj.html
 # https://free3d.com/3d-model/low-poly-male-26691.html
 # https://free3d.com/3d-model/low_poly_tree-816203.html
-from dataclasses import dataclass
-from typing import Tuple, List, Callable
+from dataclasses import dataclass, field
+from typing import Tuple, List, Dict, Callable
 from copy import deepcopy
 from math import sin, cos, pi
 import pygame
@@ -29,6 +29,17 @@ class Camera(object):
     theta_y: float = 0
     theta_z: float = 0
     vertical_angle: float = 0
+    angle_ratios: Dict[str, float] = field(default_factory=dict)
+
+    def compute_angle_ratios(self) -> None:
+        self.angle_ratios = {
+            "sin_tx": sin(self.theta_y),
+            "sin_ty": sin(self.theta_x),
+            "sin_tz": sin(self.theta_z),
+            "cos_tx": cos(self.theta_y),
+            "cos_ty": cos(self.theta_x),
+            "cos_tz": cos(self.theta_z)
+        }
 
 interface = tk.Tk()
 interface.title('hngin -- settings bar')
@@ -86,13 +97,17 @@ class V(object):
         x = (self.x - camera.x)
         y = (self.y - camera.y)
         z = (self.z - camera.z)
-        tx = camera.theta_y
-        ty = camera.theta_x
-        tz = camera.theta_z
+        stx = camera.angle_ratios["sin_tx"]
+        sty = camera.angle_ratios["sin_ty"]
+        stz = camera.angle_ratios["sin_tz"]
+        ctx = camera.angle_ratios["cos_tx"]
+        cty = camera.angle_ratios["cos_ty"]
+        ctz = camera.angle_ratios["cos_tz"]
+
         rotated = V(
-            z*sin(ty)*cos(tx) + y*(sin(tx)*sin(ty)*cos(tz) - sin(tz)*cos(ty)) + x*(sin(tx)*sin(ty)*sin(tz) + cos(ty)*cos(tz)),
-            -z*sin(tx) + x*sin(tz)*cos(tx) + y*cos(tx)*cos(tz),
-            x*(sin(tx)*sin(tz)*cos(ty) - sin(ty)*cos(tz)) + y*(sin(tx)*cos(ty)*cos(tz) + sin(ty)*sin(tz)) + z*cos(tx)*cos(ty)
+            z*sty*ctx + y*(stx*sty*ctz - stz*cty) + x*(stx*sty*stz + cty*ctz),
+            -z*stx + x*stz*ctx + y*ctx*ctz,
+            x*(stx*stz*cty - sty*ctz) + y*(stx*cty*ctz + sty*stz) + z*ctx*cty
         )
         if rotated.z < 0:
             return None
@@ -266,6 +281,7 @@ while running:
 
     screen.fill((0, 0, 0))
 
+    camera.compute_angle_ratios()
     scene.render(camera)
 
     screen.blit(font.render(f'FPS: {round(clock.get_fps())}', True, (255, 255, 255)), (10, 10))
