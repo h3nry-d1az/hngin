@@ -14,9 +14,9 @@ import pygame
 import tkinter as tk
 
 def cartesian_to_pygame(
-    x: int,
-    y: int
-) -> Tuple[int, int]:
+    x: float,
+    y: float
+) -> Tuple[float, float]:
     return (x + screen_size[0]//2,
             screen_size[1]//2 - y)
 
@@ -25,9 +25,9 @@ class Camera(object):
     x: float
     y: float
     z: float
-    theta_x: float = 0
-    theta_y: float = 0
-    theta_z: float = 0
+    theta_x: float = 0.
+    theta_y: float = 0.
+    theta_z: float = 0.
     vertical_angle: float = 0
     angle_ratios: Dict[str, float] = field(default_factory=dict)
 
@@ -74,7 +74,7 @@ pygame.init()
 pygame.display.set_caption('hngin -- v0.0.1')
 pygame.display.set_icon(pygame.image.load('assets/hngin-favicon.png'))
 
-font = pygame.font.SysFont(None, 38)
+font = pygame.font.SysFont('Helvetica', 28)
 
 screen = pygame.display.set_mode(screen_size)
 
@@ -268,7 +268,7 @@ model_speed_slider.set(.0003*10000)
 model_speed_slider.pack()
 
 model_value = 'models/tree.obj'
-scale_value = 75
+scale_value = 75.
 
 while running:
     delta = clock.tick(FPS_slider.get())
@@ -349,6 +349,16 @@ while running:
     camera.theta_y = camera.vertical_angle*cos(camera.theta_x)
     camera.theta_z = camera.vertical_angle*sin(camera.theta_x)
 
+    if (ms := model_scale_slider.get()) != scale_value:
+        new_model = deepcopy(model_original)
+        new_model.transform(lambda v: V(
+            v.x*ms/100,
+            v.y*ms/100,
+            v.z*ms/100
+        ))
+        scene.models[-1] = new_model
+        scale_value = ms
+
     if (mt := model_entry.get()) != model_value:
         try:
             model_original = parse_obj_model(mt, (0, 255, 0))
@@ -362,16 +372,6 @@ while running:
             model_value = mt
         except Exception:
             model_value = mt
-
-    if (ms := model_scale_slider.get()) != scale_value:
-        new_model = deepcopy(model_original)
-        new_model.transform(lambda v: V(
-            v.x*ms/100,
-            v.y*ms/100,
-            v.z*ms/100
-        ))
-        scene.models[-1] = new_model
-        scale_value = ms
 
     scene.models[-1].transform(lambda vertex: V(
             vertex.z*sin(mtheta*delta) + vertex.x*cos(mtheta*delta),
