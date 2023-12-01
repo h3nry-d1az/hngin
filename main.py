@@ -12,6 +12,7 @@ from copy import deepcopy
 from math import sin, cos, pi
 import pygame
 import tkinter as tk
+from tkinter import ttk
 
 def cartesian_to_pygame(
     x: float,
@@ -19,6 +20,126 @@ def cartesian_to_pygame(
 ) -> Tuple[float, float]:
     return (x + screen_size[0]//2,
             screen_size[1]//2 - y)
+
+def hex_to_rgb(hex_value: str) -> Tuple[int, int, int]:
+    rgb = []
+    for i in (0, 2, 4):
+        decimal = int(hex_value[i:i+2], 16)
+        rgb.append(decimal)
+    return tuple(rgb)
+
+
+"""Tkinter interface for scene model settings
+"""
+models_interface = tk.Tk()
+models_interface.title('model settings')
+models_interface.iconphoto(False, tk.PhotoImage(file='assets/hngin-favicon.png'))
+models_interface.geometry('124x256+154+175')
+models_interface.resizable(False, False)
+
+models_title_label = tk.Label(models_interface, text='ʜɴɢɪɴ Model Settings', font=('Times New Roman', 10, 'bold'))
+models_title_label.pack()
+
+ttk.Separator(models_interface, orient='horizontal').pack(fill='x')
+
+vertex_size_label = tk.Label(models_interface, text='Vertex size')
+vertex_size_label.pack()
+vertex_size_slider = tk.Scale(models_interface, from_=0, to=10, orient=tk.HORIZONTAL)
+vertex_size_slider.set(0)
+vertex_size_slider.pack()
+
+ttk.Separator(models_interface, orient='horizontal').pack(fill='x')
+
+model_label = tk.Label(models_interface, text='Rotating model')
+model_label.pack()
+model_entry = tk.Entry(models_interface)
+model_entry.insert(0, 'models/tree.obj')
+model_entry.pack()
+
+model_scale_label = tk.Label(models_interface, text='Rotating model scale')
+model_scale_label.pack()
+model_scale_slider = tk.Scale(models_interface, from_=0, to=200, orient=tk.HORIZONTAL)
+model_scale_slider.set(75)
+model_scale_slider.pack()
+
+ttk.Separator(models_interface, orient='horizontal').pack(fill='x')
+
+model_speed_label = tk.Label(models_interface, text='Model rotation speed')
+model_speed_label.pack()
+model_speed_slider = tk.Scale(models_interface, from_=0, to=.001*10000, orient=tk.HORIZONTAL)
+model_speed_slider.set(.0003*10000)
+model_speed_slider.pack()
+
+
+"""Tkinter interface for engine settings
+"""
+engine_interface = tk.Toplevel(models_interface)
+engine_interface.title('engine settings')
+engine_interface.iconphoto(False, tk.PhotoImage(file='assets/hngin-favicon.png'))
+engine_interface.geometry('142x350+1050+175')
+engine_interface.resizable(False, False)
+
+engine_title_label = tk.Label(engine_interface, text='ʜɴɢɪɴ Engine Settings', font=('Times New Roman', 10, 'bold'))
+engine_title_label.pack()
+
+ttk.Separator(engine_interface, orient='horizontal').pack(fill='x')
+
+FPS_label = tk.Label(engine_interface, text='Maximum FPS')
+FPS_label.pack()
+FPS_slider = tk.Scale(engine_interface, from_=0, to=60, orient=tk.HORIZONTAL)
+FPS_slider.set(30)
+FPS_slider.pack()
+
+ttk.Separator(engine_interface, orient='horizontal').pack(fill='x')
+
+focal_length_label = tk.Label(engine_interface, text='Focal length')
+focal_length_label.pack()
+focal_length_slider = tk.Scale(engine_interface, from_=0, to=2000, orient=tk.HORIZONTAL)
+focal_length_slider.set(1000)
+focal_length_slider.pack()
+
+ttk.Separator(engine_interface, orient='horizontal').pack(fill='x')
+
+def toggle_face_properties():
+    if not hollow_faces.get():
+        vertex_size_slider.set(0)
+    else:
+        vertex_size_slider.set(1)
+
+hollow_faces = tk.BooleanVar()
+hollow_checkbox = tk.Checkbutton(
+    engine_interface,
+    text='Hollow faces',
+    variable=hollow_faces,
+    onvalue=True,
+    offvalue=False,
+    command=toggle_face_properties,
+)
+hollow_checkbox.pack()
+
+ttk.Separator(engine_interface, orient='horizontal').pack(fill='x')
+
+background_color_label = tk.Label(engine_interface, text='Background color')
+background_color_label.pack()
+background_color_entry = tk.Entry(engine_interface)
+background_color_entry.insert(0, '0A0A0A')
+background_color_entry.pack()
+
+ttk.Separator(engine_interface, orient='horizontal').pack(fill='x')
+
+speed_label = tk.Label(engine_interface, text='Camera movement speed')
+speed_label.pack()
+speed_slider = tk.Scale(engine_interface, from_=0, to=.5*100, orient=tk.HORIZONTAL)
+speed_slider.set(.05*100)
+speed_slider.pack()
+
+ttk.Separator(engine_interface, orient='horizontal').pack(fill='x')
+
+theta_label = tk.Label(engine_interface, text='Camera rotation speed')
+theta_label.pack()
+theta_slider = tk.Scale(engine_interface, from_=0, to=.002*10000, orient=tk.HORIZONTAL)
+theta_slider.set(.0007*10000)
+theta_slider.pack()
 
 @dataclass
 class Camera(object):
@@ -41,33 +162,8 @@ class Camera(object):
             "cos_tz": cos(self.theta_z)
         }
 
-interface = tk.Tk()
-interface.title('hngin -- settings bar')
-interface.iconphoto(False, tk.PhotoImage(file='assets/hngin-favicon.png'))
-interface.geometry('127x544+1050+75')
-interface.resizable(False, False)
-
-FPS_label = tk.Label(text='Maximum FPS')
-FPS_label.pack()
-FPS_slider = tk.Scale(from_=0, to=60, orient=tk.HORIZONTAL)
-FPS_slider.set(30)
-FPS_slider.pack()
-
-focal_length_label = tk.Label(text='Focal length')
-focal_length_label.pack()
-focal_length_slider = tk.Scale(from_=0, to=2000, orient=tk.HORIZONTAL)
-focal_length_slider.set(1000)
-focal_length_slider.pack()
-
 # screen_size = (1280, 720)
 screen_size = (640, 480)
-
-vertex_size_label = tk.Label(text='Vertex size')
-vertex_size_label.pack()
-vertex_size_slider = tk.Scale(from_=0, to=10, orient=tk.HORIZONTAL)
-vertex_size_slider.set(1)
-vertex_size_slider.pack()
-
 camera = Camera(0, 8, -50)
 
 pygame.init()
@@ -124,37 +220,43 @@ class V(object):
                            vertex_size_slider.get())
 
 @dataclass
-class L(object):
+class F(object):
     vertex_1: V
     vertex_2: V
+    vertex_3: V
 
-    def render(self,
-               camera: Camera,
-               color: Tuple[int, int, int]) -> None:
+    def render(
+        self,
+        camera: Camera,
+        color: Tuple[int, int, int]
+    ) -> None:
         if not (p1 := self.vertex_1.project(camera))\
-        or not (p2 := self.vertex_2.project(camera)):
+        or not (p2 := self.vertex_2.project(camera))\
+        or not (p3 := self.vertex_3.project(camera)):
             return
-        pygame.draw.line(screen, color, p1, p2)
+        pygame.draw.polygon(screen, color, [p1, p2, p3],
+            1 if hollow_faces.get() else 0)
 
 @dataclass
 class Model(object):
     vertices: List[V]
-    lines: List[L] | None
+    faces: List[F] | None
     color: Tuple[int, int, int]
 
     def render(self,
                camera: Camera) -> None:
-        if self.lines:
-            for line in self.lines:
-                line.render(camera, self.color)
+        if self.faces:
+            for face in self.faces:
+                face.render(camera, self.color)
 
-        for vertex in self.vertices:
-            vertex.render(camera)
+        if vertex_size_slider.get() != 0:
+            for vertex in self.vertices:
+                vertex.render(camera)
 
     def transform(self, f: Callable[[V], V]) -> None:
         self.vertices = list(map(f, self.vertices))
-        if self.lines:
-            self.lines = list(map(lambda l: L(f(l.vertex_1), f(l.vertex_2)), self.lines))
+        if self.faces:
+            self.faces = list(map(lambda fc: F(f(fc.vertex_1), f(fc.vertex_2), f(fc.vertex_3)), self.faces))
 
 @dataclass
 class Scene(object):
@@ -170,7 +272,7 @@ def parse_obj_model(path: str,
     with open(path, 'r') as object:
         data = object.read()
         vertices = []
-        lines = []
+        faces = []
         for line in data.split('\n'):
             if len(line) == 0:
                 continue
@@ -182,20 +284,14 @@ def parse_obj_model(path: str,
                 normalized = []
                 for p in params[1:]:
                     normalized.append(int(p.split('/')[0]))
-                faces = []
                 for i in range(1, len(normalized)+1):
                     try:
-                        faces.append([vertices[normalized[0]-1],
-                                      vertices[normalized[i]-1],
-                                      vertices[normalized[i+1]-1]])
+                        faces.append(F(vertices[normalized[0]-1],
+                                       vertices[normalized[i]-1],
+                                       vertices[normalized[i+1]-1]))
                     except IndexError:
                         break
-                # print(faces, line, normalized)
-                for face in faces:
-                    lines.append(L(face[0], face[1]))
-                    lines.append(L(face[1], face[2]))
-                    lines.append(L(face[2], face[0]))
-        return Model(vertices, lines, color)
+        return Model(vertices, faces, color)
 
 model_original = parse_obj_model('models/tree.obj', (0, 255, 0))
 model = deepcopy(model_original)
@@ -227,48 +323,15 @@ base_icosahedron.transform(
 render_icosahedron = deepcopy(base_icosahedron)
 scene = Scene([cube, pyramid, render_icosahedron, model])
 
-speed_label = tk.Label(text='Camera speed')
-speed_label.pack()
-speed_slider = tk.Scale(from_=0, to=.5*100, orient=tk.HORIZONTAL)
-speed_slider.set(.05*100)
-speed_slider.pack()
-
-theta_label = tk.Label(text='Rotation speed')
-theta_label.pack()
-theta_slider = tk.Scale(from_=0, to=.002*10000, orient=tk.HORIZONTAL)
-theta_slider.set(.0007*10000)
-theta_slider.pack()
-
 running = True
 clock = pygame.time.Clock()
 time = 0
 
-freq_label = tk.Label(text='Icosahedron frequency')
-freq_label.pack()
-freq_slider = tk.Scale(from_=1, to=10_000, orient=tk.HORIZONTAL)
-freq_slider.set(4000)
-freq_slider.pack()
-
-model_label = tk.Label(text='Rotating model')
-model_label.pack()
-model_entry = tk.Entry()
-model_entry.insert(0, 'models/tree.obj')
-model_entry.pack()
-
-model_scale_label = tk.Label(text='Rotating model scale')
-model_scale_label.pack()
-model_scale_slider = tk.Scale(from_=0, to=200, orient=tk.HORIZONTAL)
-model_scale_slider.set(75)
-model_scale_slider.pack()
-
-model_speed_label = tk.Label(text='Model rotation speed')
-model_speed_label.pack()
-model_speed_slider = tk.Scale(from_=0, to=.001*10000, orient=tk.HORIZONTAL)
-model_speed_slider.set(.0003*10000)
-model_speed_slider.pack()
-
 model_value = 'models/tree.obj'
 scale_value = 75.
+freq = 4000
+
+last_background_color = (0, 0, 0)
 
 while running:
     delta = clock.tick(FPS_slider.get())
@@ -277,9 +340,13 @@ while running:
     speed = speed_slider.get() / 100
     theta = theta_slider.get() / 10000
     mtheta = model_speed_slider.get() / 10000
-    freq = freq_slider.get()
 
-    screen.fill((0, 0, 0))
+    try:
+        entry = background_color_entry.get()
+        screen.fill(hex_to_rgb(entry))
+        last_background_color = hex_to_rgb(entry)
+    except Exception:
+        screen.fill(last_background_color)
 
     camera.compute_angle_ratios()
     scene.render(camera)
@@ -299,7 +366,8 @@ while running:
     screen.blit(angle_z, (screen_size[0] - angle_z.get_width() - 10, 100))
 
     pygame.display.flip()
-    interface.update()
+    models_interface.update()
+    engine_interface.update()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -328,18 +396,6 @@ while running:
         camera.vertical_angle = min(camera.vertical_angle + theta*delta, pi)
     if keys[pygame.K_s]:
         camera.vertical_angle = max(camera.vertical_angle - theta*delta, -pi)
-    # if keys[pygame.K_q]:
-    #     camera.theta_y = min(camera.theta_y + theta*delta, pi)
-    # if keys[pygame.K_a]:
-    #     camera.theta_y = max(camera.theta_y - theta*delta, -pi)
-    # if keys[pygame.K_w]:
-    #     camera.theta_x = min(camera.theta_x + theta*delta, pi)
-    # if keys[pygame.K_s]:
-    #     camera.theta_x = max(camera.theta_x - theta*delta, -pi)
-    # if keys[pygame.K_e]:
-    #     camera.theta_z = min(camera.theta_z + theta*delta, pi)
-    # if keys[pygame.K_d]:
-    #     camera.theta_z = max(camera.theta_z - theta*delta, -pi)
     if keys[pygame.K_SPACE]:
         camera.y += speed*delta
     if (keys[pygame.K_LSHIFT]) or \
