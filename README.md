@@ -75,16 +75,18 @@ The project binaries will **NOT** be available in the releases section.
 ## Project roadmap
 Even though enough features have been implemented within the engine to have been able to make the decision to make it public, most of the functionalities that I would like to see covered and that I think would be feasible are not yet implemented. Therefore, below is the roadmap designed for the project (although without any date, it is more than likely that not all of them will end up being fulfilled):
 
-- [X] [Achieve orthogonal projection.](https://github.com/h3nry-d1az/hngin/tree/91eef2ba994b3fea536ff25a397b62b72d9e82e5)
-- [X] [Achieve projection based on focal length and linear interpolation.](https://github.com/h3nry-d1az/hngin/tree/c9613bdb4194ea96fc4b72bbc003aec0d7145aaa)
-- [X] [Importing .obj files (vertices).](https://github.com/h3nry-d1az/hngin/tree/d827c81ccd1772b8cd1bf25c3a9eb9ef99e844fb)
-- [X] [Importing .obj files (faces).](https://github.com/h3nry-d1az/hngin/tree/38ef1b6ac8f221972e7d57ccf336842483cb921a)
-- [X] [Fix visual glitches.](https://github.com/h3nry-d1az/hngin/tree/88b99ed805da7fda49897e1473ff67d2724ebebe)
-- [X] [Implement camera rotations.](https://github.com/h3nry-d1az/hngin/tree/3233cb4fdd171ce86cddf49c5fb0a89e19567097)
-- [X] [Implement a settings bar.](https://github.com/h3nry-d1az/hngin/tree/6ef936bac3ce936e5f04910698c3af268673e1d4)
-- [ ] Change the use of edges for faces.
-- [ ] Optimize code and improve execution speed.
-- [ ] Add solid colors to the models' faces.
+- [X] [Achieve orthogonal projection.](https://github.com/h3nry-d1az/hngin/commit/91eef2ba994b3fea536ff25a397b62b72d9e82e5)
+- [X] [Achieve projection based on focal length and linear interpolation.](https://github.com/h3nry-d1az/hngin/commit/c9613bdb4194ea96fc4b72bbc003aec0d7145aaa)
+- [X] [Importing .obj files (vertices).](https://github.com/h3nry-d1az/hngin/commit/d827c81ccd1772b8cd1bf25c3a9eb9ef99e844fb)
+- [X] [Importing .obj files (faces).](https://github.com/h3nry-d1az/hngin/commit/38ef1b6ac8f221972e7d57ccf336842483cb921a)
+- [X] [Fix visual glitches.](https://github.com/h3nry-d1az/hngin/commit/88b99ed805da7fda49897e1473ff67d2724ebebe)
+- [X] [Implement camera rotations.](https://github.com/h3nry-d1az/hngin/commit/3233cb4fdd171ce86cddf49c5fb0a89e19567097)
+- [X] [Implement a settings bar.](https://github.com/h3nry-d1az/hngin/commit/6ef936bac3ce936e5f04910698c3af268673e1d4)
+- [X] [Change the use of edges for faces.](https://github.com/h3nry-d1az/hngin/commit/26eb91c901c57fd294728704f63b67d59b0cc251)
+- [X] [Optimize code and improve execution speed.](https://github.com/h3nry-d1az/hngin/commit/8b777f71889f3c32ccfa50db5846623d8cff0b22)
+- [X] [Add solid colors to the models' faces.](https://github.com/h3nry-d1az/hngin/commit/26eb91c901c57fd294728704f63b67d59b0cc251)
+- [ ] Implement the painter's algorithm for rendering order.
+- [ ] Implement the diffuse lighting algorithm.
 - [ ] Add support for textures in models.
 
 (Almost) all progress on this project has been recorded and saved to the YouTube playlist ["Motor 3D ʜɴɢɪɴ"](https://youtube.com/playlist?list=PLwG1fQu9A7F3SG0JXcnpE5Zx_uLFYuLz9&si=w7sWMobJYwKLGsbH). Any contribution that helps carry out the above goals will always be welcome.
