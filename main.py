@@ -7,9 +7,10 @@
 # https://free3d.com/3d-model/low-poly-male-26691.html
 # https://free3d.com/3d-model/low_poly_tree-816203.html
 from dataclasses import dataclass, field
+from functools import reduce
 from typing import Tuple, List, Dict, Callable, cast
 from copy import deepcopy
-from math import sin, cos, pi
+from math import sin, cos, pi, sqrt
 import pygame
 import tkinter as tk
 from tkinter import ttk
@@ -177,7 +178,7 @@ screen_size = (640, 480)
 camera = Camera(0, 8, -50)
 
 pygame.init()
-pygame.display.set_caption("hngin -- v0.0.1")
+pygame.display.set_caption("hngin -- v0.0.2")
 pygame.display.set_icon(pygame.image.load("assets/hngin-favicon.png"))
 
 font = pygame.font.SysFont("Helvetica", 28)
@@ -244,6 +245,24 @@ class F(object):
             return
         pygame.draw.polygon(screen, color, [p1, p2, p3], 1 if hollow_faces.get() else 0)
 
+    def distance(self, camera: Camera) -> float:
+        d1 = sqrt(
+            (self.vertex_1.x - camera.x) ** 2
+            + (self.vertex_1.y - camera.y) ** 2
+            + (self.vertex_1.z - camera.z) ** 2
+        )
+        d2 = sqrt(
+            (self.vertex_2.x - camera.x) ** 2
+            + (self.vertex_2.y - camera.y) ** 2
+            + (self.vertex_2.z - camera.z) ** 2
+        )
+        d3 = sqrt(
+            (self.vertex_3.x - camera.x) ** 2
+            + (self.vertex_3.y - camera.y) ** 2
+            + (self.vertex_3.z - camera.z) ** 2
+        )
+        return min(d1, d2, d3)
+
 
 @dataclass
 class Model(object):
@@ -276,8 +295,17 @@ class Scene(object):
     models: List[Model]
 
     def render(self, camera: Camera) -> None:
-        for model in self.models:
-            model.render(camera)
+        faces = reduce(
+            lambda l1, l2: l1 + l2,
+            map(
+                lambda m: list(map(lambda f: (f, m.color), cast(List[F], m.faces))),
+                self.models,
+            ),
+        )
+        for face, color in sorted(
+            faces, key=lambda f: f[0].distance(camera), reverse=True
+        ):
+            face.render(camera, color)
 
 
 def parse_obj_model(path: str, color: Tuple[int, int, int]) -> Model:
