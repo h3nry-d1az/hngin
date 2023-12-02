@@ -50,13 +50,13 @@ Once the previous dependencies have been installed, one can finally run the engi
 python ./main.py
 ```
 
-Which should cause two windows to be displayed on the screen, a rectangular one (640x480), centered on the screen (approximately) and a longer one located right next to it, which processes the engine configurations.
+Which should cause three windows to be displayed on the screen, a rectangular one (640x480), centered on the screen (approximately) and two smaller ones located right next to it, which processes the engine configurations.
 
 #### Visual results of the program
 The aforementioned windows should look as shown below:
 
+https://github.com/h3nry-d1az/hngin/assets/61124185/8ced082d-ae94-4345-815a-a3ec5e67791e
 
-https://github.com/h3nry-d1az/hngin/assets/61124185/b1d58bfe-ab9c-4c51-890c-cdd01d74485a
 
 
 #### Packaging the program in an executable binary
@@ -70,7 +70,7 @@ Again, for more information you can go to the [project website](https://pyinstal
 pyinstaller --onefile --noconsole ./main.py
 ```
 
-The project binaries will **NOT** be available in the releases section.
+Precompiled binaries for **Windows** (from version v0.0.2 onwards) will be provided in the [releases](https://github.com/h3nry-d1az/hngin/releases) section.
 
 ## Project roadmap
 Even though enough features have been implemented within the engine to have been able to make the decision to make it public, most of the functionalities that I would like to see covered and that I think would be feasible are not yet implemented. Therefore, below is the roadmap designed for the project (although without any date, it is more than likely that not all of them will end up being fulfilled):
@@ -85,13 +85,15 @@ Even though enough features have been implemented within the engine to have been
 - [X] [Change the use of edges for faces.](https://github.com/h3nry-d1az/hngin/commit/26eb91c901c57fd294728704f63b67d59b0cc251)
 - [X] [Optimize code and improve execution speed.](https://github.com/h3nry-d1az/hngin/commit/8b777f71889f3c32ccfa50db5846623d8cff0b22)
 - [X] [Add solid colors to the models' faces.](https://github.com/h3nry-d1az/hngin/commit/26eb91c901c57fd294728704f63b67d59b0cc251)
-- [ ] Implement the painter's algorithm for rendering order.
+- [X] [Implement the painter's algorithm for rendering order.](https://github.com/h3nry-d1az/hngin/commit/8f946ae000efd6b3ae5573fd96a8e3739a200292)
 - [ ] Implement the diffuse lighting algorithm.
 - [ ] Add support for textures in models.
 
 (Almost) all progress on this project has been recorded and saved to the YouTube playlist ["Motor 3D ʜɴɢɪɴ"](https://youtube.com/playlist?list=PLwG1fQu9A7F3SG0JXcnpE5Zx_uLFYuLz9&si=w7sWMobJYwKLGsbH). Any contribution that helps carry out the above goals will always be welcome.
 
 ## Intuition behind the engine code
+> [!WARNING]  
+> The following article is written regarding version v0.0.1 of the program and, therefore, all the concepts explained here are valid for the aforementioned version, since they may have undergone changes. To view the code in such version, go [here](https://github.com/h3nry-d1az/hngin/tree/c09bf71742b8db90c284db1f8491f99d05ebea0e).
 
 <details open>
 <summary>Section table of contents</summary>
