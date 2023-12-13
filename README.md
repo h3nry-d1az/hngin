@@ -86,7 +86,7 @@ Even though enough features have been implemented within the engine to have been
 - [X] [Optimize code and improve execution speed.](https://github.com/h3nry-d1az/hngin/commit/8b777f71889f3c32ccfa50db5846623d8cff0b22)
 - [X] [Add solid colors to the models' faces.](https://github.com/h3nry-d1az/hngin/commit/26eb91c901c57fd294728704f63b67d59b0cc251)
 - [X] [Implement the painter's algorithm for rendering order.](https://github.com/h3nry-d1az/hngin/commit/8f946ae000efd6b3ae5573fd96a8e3739a200292)
-- [ ] Implement the diffuse lighting algorithm.
+- [X] [Implement algorithm for direct lighting.](https://github.com/h3nry-d1az/hngin/commit/0c5aaea9de7e6591c5961dd70d69e7338c174676)
 - [ ] Add support for textures in models.
 
 (Almost) all progress on this project has been recorded and saved to the YouTube playlist ["Motor 3D ʜɴɢɪɴ"](https://youtube.com/playlist?list=PLwG1fQu9A7F3SG0JXcnpE5Zx_uLFYuLz9&si=w7sWMobJYwKLGsbH). Any contribution that helps carry out the above goals will always be welcome.
