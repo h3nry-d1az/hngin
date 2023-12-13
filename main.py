@@ -8,7 +8,7 @@
 # https://free3d.com/3d-model/low_poly_tree-816203.html
 from dataclasses import dataclass, field
 from functools import reduce
-from typing import Tuple, List, Dict, Callable, cast
+from typing import Tuple, List, Dict, Callable, Any, cast
 from copy import deepcopy
 from math import sin, cos, pi, sqrt
 import pygame
@@ -79,7 +79,7 @@ model_speed_slider.pack()
 engine_interface = tk.Toplevel(models_interface)
 engine_interface.title("engine settings")
 engine_interface.iconphoto(False, tk.PhotoImage(file="assets/hngin-favicon.png"))
-engine_interface.geometry("142x350+1050+175")
+engine_interface.geometry("142x442+1050+125")
 engine_interface.resizable(False, False)
 
 engine_title_label = tk.Label(
@@ -123,6 +123,38 @@ hollow_checkbox = tk.Checkbutton(
     command=toggle_face_properties,
 )
 hollow_checkbox.pack()
+
+ttk.Separator(engine_interface, orient="horizontal").pack(fill="x")
+
+
+def toggle_illumination_properties():
+    if not direct_illumination.get():
+        light_intensity_slider.set(0)
+    else:
+        light_intensity_slider.set(60)
+
+
+direct_illumination = tk.BooleanVar()
+illumination_checkbox = tk.Checkbutton(
+    engine_interface,
+    text="Direct illumination",
+    variable=direct_illumination,
+    onvalue=True,
+    offvalue=False,
+    command=toggle_illumination_properties,
+)
+direct_illumination.set(True)
+illumination_checkbox.pack()
+
+ttk.Separator(engine_interface, orient="horizontal").pack(fill="x")
+
+light_intensity_label = tk.Label(engine_interface, text="Luminous intensity")
+light_intensity_label.pack()
+light_intensity_slider = tk.Scale(
+    engine_interface, from_=0, to=100, orient=tk.HORIZONTAL
+)
+light_intensity_slider.set(60)
+light_intensity_slider.pack()
 
 ttk.Separator(engine_interface, orient="horizontal").pack(fill="x")
 
@@ -197,6 +229,11 @@ class V(object):
         self.y += y
         self.z += z
 
+    def distance(self, other: Any) -> float:
+        return sqrt(
+            (self.x - other.x) ** 2 + (self.y - other.y) ** 2 + (self.z - other.z) ** 2
+        )
+
     def project(self, camera: Camera) -> Tuple[float, float] | None:
         x = self.x - camera.x
         y = self.y - camera.y
@@ -236,32 +273,44 @@ class F(object):
     vertex_2: V
     vertex_3: V
 
-    def render(self, camera: Camera, color: Tuple[int, int, int]) -> None:
+    def render(self, camera: Camera, color: tuple) -> None:
         if (
             not (p1 := self.vertex_1.project(camera))
             or not (p2 := self.vertex_2.project(camera))
             or not (p3 := self.vertex_3.project(camera))
         ):
             return
-        pygame.draw.polygon(screen, color, [p1, p2, p3], 1 if hollow_faces.get() else 0)
 
-    def distance(self, camera: Camera) -> float:
-        d1 = sqrt(
-            (self.vertex_1.x - camera.x) ** 2
-            + (self.vertex_1.y - camera.y) ** 2
-            + (self.vertex_1.z - camera.z) ** 2
+        final_color = color
+        if direct_illumination.get():
+            try:
+                brightness = light_intensity_slider.get() * (
+                    1 / self.center.distance(camera)
+                )
+                final_color = (
+                    min(final_color[0] * brightness, 255.0),
+                    min(final_color[1] * brightness, 255.0),
+                    min(final_color[2] * brightness, 255.0),
+                )
+
+            except ZeroDivisionError:
+                final_color = (255, 255, 255)
+
+        pygame.draw.polygon(
+            screen, final_color, [p1, p2, p3], 1 if hollow_faces.get() else 0
         )
-        d2 = sqrt(
-            (self.vertex_2.x - camera.x) ** 2
-            + (self.vertex_2.y - camera.y) ** 2
-            + (self.vertex_2.z - camera.z) ** 2
+
+    @property
+    def center(self) -> V:
+        xs = [self.vertex_1.x, self.vertex_2.x, self.vertex_3.x]
+        ys = [self.vertex_1.y, self.vertex_2.y, self.vertex_3.y]
+        zs = [self.vertex_1.z, self.vertex_2.z, self.vertex_3.z]
+
+        return V(
+            (max(xs) + min(xs)) / 2,
+            (max(ys) + min(ys)) / 2,
+            (max(zs) + min(zs)) / 2,
         )
-        d3 = sqrt(
-            (self.vertex_3.x - camera.x) ** 2
-            + (self.vertex_3.y - camera.y) ** 2
-            + (self.vertex_3.z - camera.z) ** 2
-        )
-        return min(d1, d2, d3)
 
 
 @dataclass
@@ -303,7 +352,7 @@ class Scene(object):
             ),
         )
         for face, color in sorted(
-            faces, key=lambda f: f[0].distance(camera), reverse=True
+            faces, key=lambda f: f[0].center.distance(camera), reverse=True
         ):
             face.render(camera, color)
 
@@ -338,7 +387,7 @@ def parse_obj_model(path: str, color: Tuple[int, int, int]) -> Model:
         return Model(vertices, faces, color)
 
 
-model_original = parse_obj_model("models/tree.obj", (0, 255, 0))
+model_original = parse_obj_model("models/tree.obj", (11, 102, 35))
 model = deepcopy(model_original)
 model.transform(
     lambda v: V(
@@ -347,11 +396,11 @@ model.transform(
         v.z * 0.75,
     )
 )
-cube = parse_obj_model("models/cube.obj", (0, 0, 255))
+cube = parse_obj_model("models/cube.obj", (0, 102, 178))
 cube.transform(lambda v: V(v.x + 9, v.y + 8, v.z + 6))
-pyramid = parse_obj_model("models/pyramid.obj", (255, 255, 0))
+pyramid = parse_obj_model("models/pyramid.obj", (255, 215, 0))
 pyramid.transform(lambda v: V(v.x * 6 - 10, v.y * 6 + 8, v.z * 6 + 6))
-base_icosahedron = parse_obj_model("models/icosahedron.obj", (255, 0, 0))
+base_icosahedron = parse_obj_model("models/icosahedron.obj", (128, 0, 0))
 base_icosahedron.transform(lambda v: V(v.x * 3 - 13, v.y * 3 + 5, v.z * 3 + 8))
 render_icosahedron = deepcopy(base_icosahedron)
 scene = Scene([cube, pyramid, render_icosahedron, model])
