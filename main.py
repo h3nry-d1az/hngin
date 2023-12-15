@@ -356,6 +356,17 @@ class Scene(object):
         ):
             face.render(camera, color)
 
+        if vertex_size_slider.get() != 0:
+            vertices = reduce(
+                lambda l1, l2: l1 + l2,
+                map(
+                    lambda m: m.vertices,
+                    self.models,
+                ),
+            )
+            for vertex in vertices:
+                vertex.render(camera)
+
 
 def parse_obj_model(path: str, color: Tuple[int, int, int]) -> Model:
     with open(path, "r") as object:
