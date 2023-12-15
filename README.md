@@ -9,7 +9,7 @@
 
 **ʜɴɢɪɴ** is an attempt to implement a three-dimensional rendering engine from scratch, based mainly on my intuition, my limited knowledge of linear algebra and some research and information gathering that I have carried out in order to achieve certain functionalities.
 
-As can be inferred from the current state of the project, it should be treated for the moment as a proof of concept rather than a stable and secure product, since there are still many functionalities to be implemented that are necessary in any rendering engine (see the [to-do](https://github.com/h3nry-d1az/hngin#project-roadmap) section), as well as some possible bugs to cover, improve the code in many aspects and write documentation for all the features and operation of the software (however, for a greater understanding of this aspect one can go to the [intuition behind the engine](https://github.com/h3nry-d1az/hngin#intuition-behind-the-engine-code) section); it is also necessary to mention the detail that this program is written entirely in Python, which makes it relatively slow in comparison, although somewhat easier to read.
+As can be inferred from the current state of the project, it should be treated for the moment as a proof of concept rather than a stable and secure product, since there are still many functionalities to be implemented that are necessary in any rendering engine (see the [to-do](https://github.com/h3nry-d1az/hngin#project-roadmap) section), as well as some possible bugs to cover, improve the code in many aspects and write documentation for all the features and operation of the software (however, for a greater understanding of this aspect one can go to the [intuition behind the engine](https://github.com/h3nry-d1az/hngin#intuition-behind-the-engine-code) section, or read my less rigorous, expository essay about [three-dimensional rendering and its underlying algorithmics](https://h3nry-d1az.github.io/2023/12/08/an-exploration-of-3d-computer-graphics-and-rendering-techniques.html)); it is also necessary to mention the detail that this program is written entirely in Python, which makes it relatively slow in comparison, although somewhat easier to read.
 
 However, and as a result of the relatively important progress that I have been achieving in this project, I have decided to make it public and freely accessible in order to facilitate its use and to be able to receive suggestions, feedback and contributions from interested users.
 
@@ -55,7 +55,8 @@ Which should cause three windows to be displayed on the screen, a rectangular on
 #### Visual results of the program
 The aforementioned windows should look as shown below:
 
-https://github.com/h3nry-d1az/hngin/assets/61124185/8ced082d-ae94-4345-815a-a3ec5e67791e
+
+https://github.com/h3nry-d1az/hngin/assets/61124185/b9a3c228-c0db-47d4-8fb3-c3795b617d73
 
 
 
@@ -94,6 +95,9 @@ Even though enough features have been implemented within the engine to have been
 ## Intuition behind the engine code
 > [!WARNING]  
 > The following article is written regarding version v0.0.1 of the program and, therefore, all the concepts explained here are valid for the aforementioned version, since they may have undergone changes. To view the code in such version, go [here](https://github.com/h3nry-d1az/hngin/tree/c09bf71742b8db90c284db1f8491f99d05ebea0e).
+
+> [!NOTE]
+> For a less rigorous explanation of the functioning and algorithmics underlying three-dimensional rendering, that at the same time requires of a mathematical background much more accessible to the average user, see my expository essay ["An Exploration of 3D Computer Graphics and Rendering Techniques"](https://h3nry-d1az.github.io/2023/12/08/an-exploration-of-3d-computer-graphics-and-rendering-techniques.html), in which these concepts are discussed more closely.
 
 <details open>
 <summary>Section table of contents</summary>
