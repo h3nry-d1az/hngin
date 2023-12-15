@@ -210,7 +210,7 @@ screen_size = (640, 480)
 camera = Camera(0, 8, -50)
 
 pygame.init()
-pygame.display.set_caption("hngin -- v0.0.2")
+pygame.display.set_caption("hngin -- v0.0.3")
 pygame.display.set_icon(pygame.image.load("assets/hngin-favicon.png"))
 
 font = pygame.font.SysFont("Helvetica", 28)
