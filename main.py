@@ -131,7 +131,7 @@ def toggle_illumination_properties():
     if not direct_illumination.get():
         light_intensity_slider.set(0)
     else:
-        light_intensity_slider.set(60)
+        light_intensity_slider.set(2500)
 
 
 direct_illumination = tk.BooleanVar()
@@ -151,9 +151,9 @@ ttk.Separator(engine_interface, orient="horizontal").pack(fill="x")
 light_intensity_label = tk.Label(engine_interface, text="Luminous intensity")
 light_intensity_label.pack()
 light_intensity_slider = tk.Scale(
-    engine_interface, from_=0, to=100, orient=tk.HORIZONTAL
+    engine_interface, from_=0, to=5000, orient=tk.HORIZONTAL
 )
-light_intensity_slider.set(60)
+light_intensity_slider.set(2500)
 light_intensity_slider.pack()
 
 ttk.Separator(engine_interface, orient="horizontal").pack(fill="x")
@@ -285,7 +285,7 @@ class F(object):
         if direct_illumination.get():
             try:
                 brightness = light_intensity_slider.get() * (
-                    1 / self.center.distance(camera)
+                    1 / (self.center.distance(camera) ** 2)
                 )
                 final_color = (
                     min(final_color[0] * brightness, 255.0),
