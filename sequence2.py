@@ -1,10 +1,8 @@
-
 from dataclasses import dataclass
 from typing import Tuple, List, Callable
 from functools import reduce
-from math import sin, cos
-from time import sleep
-from random import shuffle, randrange
+from math import sin, cos, sqrt
+from random import randrange
 import pygame
 
 def cartesian_to_pygame(
@@ -14,18 +12,25 @@ def cartesian_to_pygame(
     return (x + screen_size[0]//2,
             screen_size[1]//2 - y)
 
+def pygame_to_cartesian(
+    x: int,
+    y: int
+) -> Tuple[int, int]:
+    return (x - screen_size[0]//2,
+            screen_size[1]//2 - y)
+
 FOV = 1000
 
 screen_size = (1280, 720)
 view_distance = 640*8
 vertex_size = 2
 
-camera = [0, 0.22, -0.85]
+camera = [10, 11, -35]
 scale = 100
 separation = 200
 
 pygame.init()
-pygame.display.set_caption('frame1')
+pygame.display.set_caption('sequence 2')
 
 screen = pygame.display.set_mode(screen_size)
 
@@ -87,47 +92,12 @@ class F(object):
     def render(
         self,
         camera: List[float],
-        gradual: bool = False,
-        t: int = 0
     ) -> None:
-        if gradual:
-            v1 = self.vertex_1.project(camera)
-            v2 = self.vertex_2.project(camera)
-            v3 = self.vertex_3.project(camera)
-            pygame.draw.line(
-                screen,
-                (255, 255, 255),
-                v1,
-                (
-                    (v1[0] * (1 - t) + v2[0] * t),
-                    (v1[1] * (1 - t) + v2[1] * t)
-                )
-            )
-            pygame.draw.line(
-                screen,
-                (255, 255, 255),
-                v2,
-                (
-                    (v2[0] * (1 - t) + v3[0] * t),
-                    (v2[1] * (1 - t) + v3[1] * t)
-                )
-            )
-            pygame.draw.line(
-                screen,
-                (255, 255, 255),
-                v3,
-                (
-                    (v3[0] * (1 - t) + v1[0] * t),
-                    (v3[1] * (1 - t) + v1[1] * t)
-                )
-            )
-
-        else:
-            pygame.draw.polygon(screen, self.color, (
-                self.vertex_1.project(camera),
-                self.vertex_2.project(camera),
-                self.vertex_3.project(camera)
-            ))
+        pygame.draw.polygon(screen, (255, 255, 255), (
+            self.vertex_1.project(camera),
+            self.vertex_2.project(camera),
+            self.vertex_3.project(camera)
+        ), width=1)
 
     @property
     def center(self) -> V:
@@ -141,6 +111,14 @@ class F(object):
             (max(zs) + min(zs)) / 2,
         )
 
+    def project(self, camera):
+        return F(
+            V(*pygame_to_cartesian(*self.vertex_1.project(camera)), 0),
+            V(*pygame_to_cartesian(*self.vertex_2.project(camera)), 0),
+            V(*pygame_to_cartesian(*self.vertex_3.project(camera)), 0),
+            self.color
+        )
+
 @dataclass
 class Model(object):
     vertices: List[V]
@@ -150,19 +128,8 @@ class Model(object):
         self,
         camera: List[float],
         no_dots: bool = False,
-        gradual: bool = False,
-        end_time: int = 0
     ) -> None:
-        if gradual:
-            begin = pygame.time.get_ticks()
-            end_time *= 1000
-            while pygame.time.get_ticks() - begin < end_time:
-                t = pygame.time.get_ticks()
-                for face in self.faces:
-                    face.render(camera, gradual=True, t=(t - begin)/end_time)
-                pygame.display.flip()
-
-        if self.faces and not gradual:
+        if self.faces:
             for face in sorted(self.faces, key=lambda f: f.center.brightness(camera)):
                 face.render(camera)
 
@@ -179,6 +146,12 @@ class Model(object):
             for face in self.faces:
                 transformed_faces.append(F(f(face.vertex_1), f(face.vertex_2), f(face.vertex_3), face.color))
             self.faces = transformed_faces
+
+    def project(self, camera):
+        return Model(
+            [V(*pygame_to_cartesian(*vertex.project([0, 11, -35])), 0) for vertex in self.vertices],
+            [face.project([0, 11, -35]) for face in self.faces]
+        )
 
 @dataclass
 class Scene(object):
@@ -232,7 +205,7 @@ def parse_obj_model(path: str) -> Model:
                     )))
         return Model(vertices, total_faces)
 
-model = parse_obj_model('pika.obj')
+model = parse_obj_model('human.obj')
 scene = Scene([model])
 
 speed = .05
@@ -248,24 +221,42 @@ while running:
     time += delta
     screen.fill((0, 0, 0))
 
-    if sequence == 0:
-        shuffle(scene.models[0].vertices)
-        for vertex in scene.models[0].vertices:
-            vertex.render(camera)
-            pygame.display.flip()
-            sleep(0.02)
-        sleep(2)
-        scene.models[0].render(camera, False, True, end_time=3)
-        sleep(1)
-        sequence += 1
-    else:
-        scene.models[0].render(camera, no_dots=True)
+    scene.models[0].render(camera, no_dots=True)
+
+    projected_model = scene.models[0].project(camera)
+    projected_model.transform(lambda vertex: V(vertex.x/34 + 35, vertex.y/34 + 10, 80))
+    v1 = projected_model.project(camera).vertices[1]
+    print(cartesian_to_pygame(v1.x, v1.y))
+    projected_model.render(camera, no_dots=True)
+    pygame.draw.line(screen, (255, 255, 255), (690, 280), (320 + 690, 280))
+    pygame.draw.line(screen, (255, 255, 255), (690, 280), (690, 180 + 280))
+    pygame.draw.line(screen, (255, 255, 255), (690, 180 + 280), (320 + 690, 180 + 280))
+    pygame.draw.line(screen, (255, 255, 255), (320 + 690, 280), (320 + 690, 180 + 280))
 
     pygame.display.flip()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+        camera[0] -= speed*delta
+    if keys[pygame.K_RIGHT]:
+        camera[0] += speed*delta
+    if keys[pygame.K_UP]:
+        camera[2] += speed*delta
+    if keys[pygame.K_DOWN]:
+        camera[2] -= speed*delta
+    if keys[pygame.K_w]:
+        FOV += speed*delta
+    if keys[pygame.K_s]:
+        FOV -= speed*delta
+    if keys[pygame.K_SPACE]:
+        camera[1] += speed*delta
+    if (keys[pygame.K_LSHIFT]) or \
+       (keys[pygame.K_RSHIFT]):
+        camera[1] -= speed*delta
 
     scene.models[0].transform(lambda vertex: V(
             vertex.z*sin(theta) + vertex.x*cos(theta),
