@@ -34,7 +34,10 @@ pygame.display.set_caption('sequence 2')
 
 screen = pygame.display.set_mode(screen_size)
 
-sequence = 0
+CMUSerif = pygame.font.Font("cmunbx.ttf", 64)
+implication_text = CMUSerif.render("=", True, (255, 255, 255))
+implication_text_rect = implication_text.get_rect()
+implication_text_rect.center = (screen_size[0]//2 - 50, screen_size[1]//2)
 
 @dataclass
 class V(object):
@@ -233,30 +236,13 @@ while running:
     pygame.draw.line(screen, (255, 255, 255), (690, 180 + 280), (320 + 690, 180 + 280))
     pygame.draw.line(screen, (255, 255, 255), (320 + 690, 280), (320 + 690, 180 + 280))
 
+    screen.blit(implication_text, implication_text_rect)
+
     pygame.display.flip()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT]:
-        camera[0] -= speed*delta
-    if keys[pygame.K_RIGHT]:
-        camera[0] += speed*delta
-    if keys[pygame.K_UP]:
-        camera[2] += speed*delta
-    if keys[pygame.K_DOWN]:
-        camera[2] -= speed*delta
-    if keys[pygame.K_w]:
-        FOV += speed*delta
-    if keys[pygame.K_s]:
-        FOV -= speed*delta
-    if keys[pygame.K_SPACE]:
-        camera[1] += speed*delta
-    if (keys[pygame.K_LSHIFT]) or \
-       (keys[pygame.K_RSHIFT]):
-        camera[1] -= speed*delta
 
     scene.models[0].transform(lambda vertex: V(
             vertex.z*sin(theta) + vertex.x*cos(theta),
