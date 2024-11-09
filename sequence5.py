@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Tuple, List, Callable
 from functools import reduce
-from math import sin, cos, sqrt
+from math import sin, cos, sqrt, pi
 from random import randrange
 import pygame
 
@@ -25,19 +25,14 @@ screen_size = (1280, 720)
 view_distance = 640*8
 vertex_size = 2
 
-camera = [10, 11, -35]
+camera = [0, 0.25, -1]
 scale = 100
 separation = 200
 
 pygame.init()
-pygame.display.set_caption('thumbnail')
+pygame.display.set_caption('sequence 4')
 
 screen = pygame.display.set_mode(screen_size)
-
-CMUSerif = pygame.font.Font("cmunbx.ttf", 64)
-implication_text = CMUSerif.render("=", True, (255, 255, 255))
-implication_text_rect = implication_text.get_rect()
-implication_text_rect.center = (screen_size[0]//2 - 50, screen_size[1]//2)
 
 @dataclass
 class V(object):
@@ -95,20 +90,12 @@ class F(object):
     def render(
         self,
         camera: List[float],
-        hollow: bool = False
     ) -> None:
-        if not hollow:
-            pygame.draw.polygon(screen, self.color, (
-                self.vertex_1.project(camera),
-                self.vertex_2.project(camera),
-                self.vertex_3.project(camera)
-            ))
-        else:
-            pygame.draw.polygon(screen, (255, 255, 255), (
-                self.vertex_1.project(camera),
-                self.vertex_2.project(camera),
-                self.vertex_3.project(camera)
-            ), width=1)
+        pygame.draw.polygon(screen, self.color, (
+            self.vertex_1.project(camera),
+            self.vertex_2.project(camera),
+            self.vertex_3.project(camera)
+        ))
 
     @property
     def center(self) -> V:
@@ -139,11 +126,10 @@ class Model(object):
         self,
         camera: List[float],
         no_dots: bool = False,
-        hollow: bool = False
     ) -> None:
         if self.faces:
             for face in sorted(self.faces, key=lambda f: f.center.brightness(camera)):
-                face.render(camera, hollow)
+                face.render(camera)
 
         if no_dots:
             return
@@ -170,11 +156,14 @@ class Scene(object):
     models: List[Model]
 
     def render(self,
-               camera: List[int]) -> None:
+               camera: List[int],
+               no_dots: bool = True) -> None:
         faces = reduce(lambda f1, f2: f1 + f2, map(lambda m: m.faces, self.models))
         if faces:
             for face in faces:
                 face.render(camera)
+        if no_dots:
+            return
         vertices = reduce(lambda v1, v2: v1 + v2, map(lambda m: m.vertices, self.models))
         for vertex in sorted(vertices, key=lambda v: v.brightness(camera)):
             vertex.render(camera)
@@ -217,10 +206,18 @@ def parse_obj_model(path: str) -> Model:
                     )))
         return Model(vertices, total_faces)
 
-model = parse_obj_model('pika.obj')
-increment = 50
-model.transform(lambda v: V(v.x*increment, v.y*increment, v.z*increment))
+model = parse_obj_model('mario.obj')
+cube = parse_obj_model('cube.obj')
+# size = 15
+# cube.transform(lambda v: V(v.x/size - 1, v.y/size + 0.5, v.z/size + 3))
+# size = 50
+# model.transform(lambda v: V(size*v.x, size*v.y, size*v.z))
 scene = Scene([model])
+scene.models[0].transform(lambda vertex: V(
+            vertex.z*sin(pi) + vertex.x*cos(pi),
+            vertex.y,
+            vertex.z*cos(pi) - vertex.x*sin(pi)
+        ))
 
 speed = .05
 theta = .015
@@ -235,19 +232,7 @@ while running:
     time += delta
     screen.fill((0, 0, 0))
 
-    scene.models[0].render(camera, hollow=True, no_dots=False)
-
-    projected_model = scene.models[0].project(camera)
-    projected_model.transform(lambda vertex: V(vertex.x/43 + 35, vertex.y/43 + 9, 80))
-    v1 = projected_model.project(camera).vertices[1]
-    print(cartesian_to_pygame(v1.x, v1.y))
-    projected_model.render(camera, hollow=False, no_dots=True)
-    pygame.draw.line(screen, (255, 255, 255), (690, 280), (320 + 690, 280))
-    pygame.draw.line(screen, (255, 255, 255), (690, 280), (690, 180 + 280))
-    pygame.draw.line(screen, (255, 255, 255), (690, 180 + 280), (320 + 690, 180 + 280))
-    pygame.draw.line(screen, (255, 255, 255), (320 + 690, 280), (320 + 690, 180 + 280))
-
-    # screen.blit(implication_text, implication_text_rect)
+    scene.render(camera, no_dots=True)
 
     pygame.display.flip()
 
@@ -255,8 +240,5 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    scene.models[0].transform(lambda vertex: V(
-            vertex.z*sin(theta) + vertex.x*cos(theta),
-            vertex.y,
-            vertex.z*cos(theta) - vertex.x*sin(theta)
-        ))
+    FOV = 1000*sin(time/1000)**2 + 500
+    
