@@ -25,19 +25,14 @@ screen_size = (1280, 720)
 view_distance = 640*8
 vertex_size = 2
 
-camera = [10, 11, -35]
+camera = [0, 0, -35]
 scale = 100
 separation = 200
 
 pygame.init()
-pygame.display.set_caption('thumbnail')
+pygame.display.set_caption('sequence 3')
 
 screen = pygame.display.set_mode(screen_size)
-
-CMUSerif = pygame.font.Font("cmunbx.ttf", 64)
-implication_text = CMUSerif.render("=", True, (255, 255, 255))
-implication_text_rect = implication_text.get_rect()
-implication_text_rect.center = (screen_size[0]//2 - 50, screen_size[1]//2)
 
 @dataclass
 class V(object):
@@ -62,8 +57,8 @@ class V(object):
         camera: List[float]
     ) -> Tuple[float, float]:
 
-        coordinates = (((self.x-camera[0]) * FOV) // (self.z-camera[2]),
-                       ((self.y-camera[1]) * FOV) // (self.z-camera[2]))
+        coordinates = (self.x-camera[0],
+                       self.y-camera[1])
 
         return cartesian_to_pygame(*coordinates)
 
@@ -95,20 +90,12 @@ class F(object):
     def render(
         self,
         camera: List[float],
-        hollow: bool = False
     ) -> None:
-        if not hollow:
-            pygame.draw.polygon(screen, self.color, (
-                self.vertex_1.project(camera),
-                self.vertex_2.project(camera),
-                self.vertex_3.project(camera)
-            ))
-        else:
-            pygame.draw.polygon(screen, (255, 255, 255), (
-                self.vertex_1.project(camera),
-                self.vertex_2.project(camera),
-                self.vertex_3.project(camera)
-            ), width=1)
+        pygame.draw.polygon(screen, self.color, (
+            self.vertex_1.project(camera),
+            self.vertex_2.project(camera),
+            self.vertex_3.project(camera)
+        ))
 
     @property
     def center(self) -> V:
@@ -139,11 +126,10 @@ class Model(object):
         self,
         camera: List[float],
         no_dots: bool = False,
-        hollow: bool = False
     ) -> None:
         if self.faces:
             for face in sorted(self.faces, key=lambda f: f.center.brightness(camera)):
-                face.render(camera, hollow)
+                face.render(camera)
 
         if no_dots:
             return
@@ -217,9 +203,9 @@ def parse_obj_model(path: str) -> Model:
                     )))
         return Model(vertices, total_faces)
 
-model = parse_obj_model('pika.obj')
-increment = 50
-model.transform(lambda v: V(v.x*increment, v.y*increment, v.z*increment))
+model = parse_obj_model('cube.obj')
+size = 50
+model.transform(lambda v: V(size*v.x, size*v.y, size*v.z))
 scene = Scene([model])
 
 speed = .05
@@ -236,18 +222,6 @@ while running:
     screen.fill((0, 0, 0))
 
     scene.models[0].render(camera, no_dots=True)
-
-    projected_model = scene.models[0].project(camera)
-    projected_model.transform(lambda vertex: V(vertex.x/43 + 35, vertex.y/43 + 9, 80))
-    v1 = projected_model.project(camera).vertices[1]
-    print(cartesian_to_pygame(v1.x, v1.y))
-    projected_model.render(camera, hollow=True)
-    pygame.draw.line(screen, (255, 255, 255), (690, 280), (320 + 690, 280))
-    pygame.draw.line(screen, (255, 255, 255), (690, 280), (690, 180 + 280))
-    pygame.draw.line(screen, (255, 255, 255), (690, 180 + 280), (320 + 690, 180 + 280))
-    pygame.draw.line(screen, (255, 255, 255), (320 + 690, 280), (320 + 690, 180 + 280))
-
-    # screen.blit(implication_text, implication_text_rect)
 
     pygame.display.flip()
 
